@@ -1,0 +1,11 @@
+# Built files only
+build/
+app/build/
+.gradle/
+local.properties
+*.iml
+.idea/workspace.xml
+.idea/libraries/
+captures/
+.externalNativeBuild/
+.cxx/

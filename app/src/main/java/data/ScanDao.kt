@@ -1,0 +1,32 @@
+package com.dentalscan.data
+
+import androidx.room.*
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface ScanDao {
+
+    @Insert
+    suspend fun insertScan(scan: ScanEntity): Long
+
+    @Query("SELECT * FROM scans WHERE userId = :userId ORDER BY timestamp DESC")
+    fun getScansForUser(userId: String): Flow<List<ScanEntity>>
+
+    @Query("SELECT * FROM scans ORDER BY timestamp DESC")
+    fun getAllScans(): Flow<List<ScanEntity>>
+
+    @Query("SELECT * FROM scans WHERE id = :scanId")
+    suspend fun getScanById(scanId: Long): ScanEntity?
+
+    @Query("SELECT * FROM scans WHERE userId = :userId AND condition = :condition ORDER BY timestamp DESC")
+    fun getScansByCondition(userId: String, condition: String): Flow<List<ScanEntity>>
+
+    @Delete
+    suspend fun deleteScan(scan: ScanEntity)
+
+    @Query("SELECT DISTINCT userId, userName FROM scans")
+    suspend fun getAllUsers(): List<UserProfile>
+
+    @Query("SELECT COUNT(*) FROM scans WHERE userId = :userId")
+    suspend fun getScanCountForUser(userId: String): Int
+}

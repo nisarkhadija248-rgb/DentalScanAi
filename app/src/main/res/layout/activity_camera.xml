@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Full screen camera preview -->
+    <androidx.camera.view.PreviewView
+        android:id="@+id/viewFinder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <!-- Guide frame overlay -->
+    <View
+        android:layout_width="300dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center"
+        android:background="@drawable/camera_guide_frame"/>
+
+    <!-- TOP PANEL: Step indicator + progress + guidance -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top"
+        android:orientation="vertical"
+        android:background="#CC000000"
+        android:padding="12dp">
+
+        <!-- Step counter + step name row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="6dp">
+
+            <TextView
+                android:id="@+id/stepCounterText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Step 1 of 5"
+                android:textColor="@android:color/white"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:id="@+id/stepNameText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Front View"
+                android:textColor="#FFD740"
+                android:textSize="13sp"
+                android:textStyle="bold"/>
+
+            <!-- Captured dots indicator -->
+            <TextView
+                android:id="@+id/capturedDotsText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="○○○○○"
+                android:textColor="@android:color/white"
+                android:textSize="14sp"/>
+
+        </LinearLayout>
+
+        <!-- Progress bar -->
+        <ProgressBar
+            android:id="@+id/stepProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="8dp"
+            android:max="5"
+            android:progress="0"
+            android:progressTint="#FFD740"
+            android:layout_marginBottom="8dp"/>
+
+        <!-- Guidance text -->
+        <TextView
+            android:id="@+id/guidanceText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Position your teeth in the frame"
+            android:textColor="@android:color/white"
+            android:textSize="15sp"
+            android:gravity="center"
+            android:padding="4dp"/>
+
+    </LinearLayout>
+
+    <!-- CENTER: Step illustration card -->
+    <androidx.cardview.widget.CardView
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/illustrationCard"
+        android:layout_width="180dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center_horizontal|top"
+        android:layout_marginTop="140dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="#CC000000">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="8dp">
+
+            <TextView
+                android:id="@+id/stepIllustrationEmoji"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="😁"
+                android:textSize="32sp"/>
+
+            <TextView
+                android:id="@+id/stepIllustrationText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Face camera directly"
+                android:textColor="@android:color/white"
+                android:textSize="11sp"
+                android:gravity="center"/>
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- BOTTOM PANEL: Skip + Capture buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:background="#CC000000"
+        android:padding="16dp">
+
+        <!-- Instruction text -->
+        <TextView
+            android:id="@+id/stepInstructionText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Open your mouth and face the camera directly"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Buttons row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/skipButton"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:text="Skip"
+                android:textSize="14sp"
+                android:textAllCaps="false"
+                android:layout_marginEnd="8dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:textColor="@android:color/white"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/captureButton"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="2"
+                android:text="📷 Capture"
+                android:textSize="16sp"
+                android:textAllCaps="false"
+                android:enabled="false"/>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

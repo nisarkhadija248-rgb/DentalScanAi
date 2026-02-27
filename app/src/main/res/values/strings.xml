@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">DentalScan AI</string>
+
+    <!-- Main Screen -->
+    <string name="start_scan">Start New Scan</string>
+    <string name="view_history">View History</string>
+    <string name="compare_scans">Compare Scans</string>
+    <string name="settings">Settings</string>
+
+    <!-- Analysis Screen -->
+    <string name="analyzing">Analyzing...</string>
+    <string name="please_wait">Please wait</string>
+    <string name="retake">Retake</string>
+    <string name="save_scan">Save Scan</string>
+    <string name="confidence">Confidence</string>
+    <string name="disclaimer">Disclaimer: This app provides preliminary screening only and does not replace professional dental diagnosis.</string>
+
+    <!-- Detection Results -->
+    <string name="caries_detected">Caries detected</string>
+    <string name="plaque_detected">Plaque detected</string>
+    <string name="calculus_detected">Calculus detected</string>
+    <string name="no_issues">No dental issues detected</string>
+    <string name="healthy_teeth">Your teeth appear healthy</string>
+
+    <!-- Confidence Levels -->
+    <string name="high_confidence">High confidence</string>
+    <string name="medium_confidence">Medium confidence</string>
+    <string name="low_confidence">Low confidence</string>
+
+    <!-- Scan Result -->
+    <string name="scan_result">Scan Result</string>
+</resources>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Primary -->
+    <color name="primary">#2196F3</color>
+    <color name="primary_dark">#1976D2</color>
+    <color name="primary_light">#BBDEFB</color>
+
+    <!-- Secondary -->
+    <color name="secondary">#00BCD4</color>
+    <color name="secondary_dark">#0097A7</color>
+
+    <!-- Basic -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
+
+    <!-- Status -->
+    <color name="caries_red">#F44336</color>
+    <color name="plaque_yellow">#FFC107</color>
+    <color name="calculus_purple">#9C27B0</color>
+    <color name="healthy_green">#4CAF50</color>
+
+    <!-- Backgrounds -->
+    <color name="background_light">#F5F5F5</color>
+    <color name="surface_white">#FFFFFF</color>
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+
+    <!-- Dark mode colors -->
+    <color name="dark_background">#121212</color>
+    <color name="dark_surface">#1E1E1E</color>
+    <color name="dark_text_primary">#FFFFFF</color>
+    <color name="dark_text_secondary">#BBBBBB</color>
+</resources>

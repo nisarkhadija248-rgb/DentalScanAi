@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ڈینٹل اسکین AI</string>
+    <string name="start_scan">نیا اسکین شروع کریں</string>
+    <string name="view_history">سابقہ ریکارڈ دیکھیں</string>
+    <string name="compare_scans">اسکینز کا موازنہ کریں</string>
+    <string name="scan_result">اسکین کا نتیجہ</string>
+    <string name="confidence">اعتماد</string>
+    <string name="retake">دوبارہ لیں</string>
+    <string name="save_scan">ریکارڈ محفوظ کریں</string>
+    <string name="no_issues">کوئی مسئلہ نہیں ملا</string>
+    <string name="healthy_teeth">آپ کے دانت صحت مند ہیں</string>
+    <string name="disclaimer">یہ ایپ صرف آگاہی کے لیے ہے اور پیشہ ورانہ تشخیص کی جگہ نہیں لے سکتی۔</string>
+    <string name="caries_detected">کیریز (دانتوں کی سڑن) detected</string>
+    <string name="plaque_detected">پلاک detected</string>
+    <string name="calculus_detected">کیلکولس (پتھر) detected</string>
+    <string name="high_confidence">زیادہ یقین</string>
+    <string name="medium_confidence">درمیانی یقین</string>
+    <string name="low_confidence">کم یقین</string>
+</resources>
