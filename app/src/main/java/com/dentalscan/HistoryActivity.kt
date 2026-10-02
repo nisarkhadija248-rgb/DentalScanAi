@@ -107,6 +107,9 @@ class HistoryActivity : BaseActivity() {
                     intent.putExtra("confidence", scan.confidence)
                     intent.putExtra("severity", scan.severity)
                     intent.putExtra("bounding_boxes", scan.boundingBoxes)
+                    // Needed by the Action Plan checklist: which scan to update, and what was ticked
+                    intent.putExtra("scan_id", scan.id)
+                    intent.putExtra("checked_steps", scan.checkedSteps)
                     startActivity(intent)
                 }
                 adapter.submitList(scans)

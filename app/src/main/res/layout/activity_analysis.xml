@@ -386,17 +386,123 @@
 
                         </LinearLayout>
 
+                        <!-- Headline, e.g. "Urgent: Visit a dentist within 2 weeks" -->
                         <TextView
                             android:id="@+id/actionPlanText"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:textAppearance="@style/TextAppearance.App.Body"/>
+                            android:textAppearance="@style/TextAppearance.App.Body"
+                            android:textStyle="bold"/>
+
+                        <!-- Combined plans only: "2 conditions found: Caries · Calculus" -->
+                        <TextView
+                            android:id="@+id/planFoundText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:textAppearance="@style/TextAppearance.App.Caption"
+                            android:visibility="gone"/>
+
+                        <!-- Progress: "2 of 4 steps completed" -->
+                        <TextView
+                            android:id="@+id/planProgressText"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="14dp"
+                            android:textAppearance="@style/TextAppearance.App.Label"/>
+
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/planProgressBar"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:max="1"
+                            app:trackColor="@color/surface_variant"
+                            app:trackCornerRadius="3dp"
+                            app:trackThickness="6dp"/>
+
+                        <!-- Step cards are added here from code -->
+                        <LinearLayout
+                            android:id="@+id/planStepsList"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:orientation="vertical"/>
+
+                        <!-- Shown when every step is ticked -->
+                        <LinearLayout
+                            android:id="@+id/planCongratsRow"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:background="@drawable/bg_banner"
+                            android:backgroundTint="@color/healthy_bg"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal"
+                            android:padding="12dp"
+                            android:visibility="gone">
+
+                            <ImageView
+                                android:id="@+id/planCongratsIcon"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_marginEnd="12dp"
+                                android:contentDescription="@null"
+                                android:src="@drawable/ic_check_circle"
+                                app:tint="@color/healthy_green"/>
+
+                            <TextView
+                                android:id="@+id/planCongratsText"
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:textAppearance="@style/TextAppearance.App.Title"
+                                android:textColor="@color/healthy_green"
+                                android:textSize="16sp"/>
+
+                        </LinearLayout>
 
                     </LinearLayout>
 
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
+
+            <!-- Quick tips: horizontal row of compact cards, specific to the detected condition(s) -->
+            <LinearLayout
+                android:id="@+id/tipsSection"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/tipsTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Quick Tips"
+                    android:textAppearance="@style/TextAppearance.App.Title"/>
+
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:clipToPadding="false"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="8dp"
+                    android:scrollbars="none">
+
+                    <LinearLayout
+                        android:id="@+id/tipsList"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="top"
+                        android:orientation="horizontal"/>
+
+                </HorizontalScrollView>
+
+            </LinearLayout>
 
             <!-- About this condition -->
             <com.google.android.material.card.MaterialCardView

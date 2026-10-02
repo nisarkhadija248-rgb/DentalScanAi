@@ -30,4 +30,79 @@
 
     <!-- Scan Result -->
     <string name="scan_result">Scan Result</string>
+
+    <!-- ===================== Action Plan ===================== -->
+
+    <!-- Header by urgency -->
+    <string name="plan_header_high">Urgent Action Required</string>
+    <string name="plan_header_medium">Action Recommended</string>
+    <string name="plan_header_low">Maintenance Required</string>
+
+    <!-- Headline by urgency -->
+    <string name="plan_headline_high">Urgent: Visit a dentist within 2 weeks</string>
+    <string name="plan_headline_medium">Visit a dentist within 1 to 3 months</string>
+    <string name="plan_headline_low">Keep up your routine and mention this at your next check-up</string>
+    <string name="plan_multiple_found">%1$d conditions found</string>
+
+    <!-- Dentist step by urgency -->
+    <string name="plan_step_dentist_high">Visit a dentist within the next 2 weeks, and sooner if you feel pain, swelling or sensitivity.</string>
+    <string name="plan_step_dentist_medium">Book a dentist appointment within the next 1 to 3 months.</string>
+    <string name="plan_step_dentist_low">Mention these findings at your next routine dental check-up (every 6 months).</string>
+
+    <!-- Condition-specific steps -->
+    <string name="plan_step_caries_1">Cut back on sugary and acidic foods and drinks, especially between meals and before bed.</string>
+    <string name="plan_step_caries_2">Brush the affected teeth gently with fluoride toothpaste, and avoid chewing hard foods on them until a dentist has checked them.</string>
+    <string name="plan_step_calculus_1">Book a professional cleaning (scaling): tartar cannot be removed by brushing at home.</string>
+    <string name="plan_step_calculus_2">Brush along the gumline twice a day and use an antibacterial mouthwash to slow new buildup.</string>
+    <string name="plan_step_gingivitis_1">Brush gently along the gumline twice a day and floss daily to remove plaque. Bleeding gums often improve with regular, gentle cleaning.</string>
+    <string name="plan_step_gingivitis_2">Rinse with an antibacterial mouthwash, and avoid smoking and tobacco while your gums heal.</string>
+
+    <!-- General prevention steps (always last) -->
+    <string name="plan_step_general_1">Brush for 2 minutes, twice a day, with fluoride toothpaste.</string>
+    <string name="plan_step_general_2">Floss daily and drink plenty of water, especially after meals.</string>
+
+    <!-- Checklist UI -->
+    <string name="plan_progress">%1$d of %2$d steps completed</string>
+    <string name="plan_congrats">Great job! Stay consistent</string>
+    <string name="plan_step_check_desc">Mark step %1$d as done</string>
+    <string name="plan_step_uncheck_desc">Step %1$d is done, tap to undo</string>
+
+    <!-- Quick tips -->
+    <string name="plan_quick_tips">Quick Tips</string>
+    <string name="tip_tap_more">Read more</string>
+    <string name="tip_tap_less">Show less</string>
+
+    <string name="tip_caries_1_title">Cut the sugar</string>
+    <string name="tip_caries_1_line">Sugar feeds decay bacteria.</string>
+    <string name="tip_caries_1_full">Sugary snacks and drinks feed the bacteria that cause cavities. Keep sweets to mealtimes rather than all day, and rinse with water afterwards.</string>
+    <string name="tip_caries_2_title">Fluoride helps</string>
+    <string name="tip_caries_2_line">Fluoride strengthens enamel.</string>
+    <string name="tip_caries_2_full">Use a fluoride toothpaste twice a day. Fluoride helps repair early enamel damage and makes teeth more resistant to acid. Avoid rinsing with water straight after brushing.</string>
+    <string name="tip_caries_3_title">Do not wait</string>
+    <string name="tip_caries_3_line">Cavities do not heal on their own.</string>
+    <string name="tip_caries_3_full">Decay does not reverse once it has gone through the enamel. A small filling now is much simpler than a root canal later, so book a visit soon.</string>
+
+    <string name="tip_calculus_1_title">Get it scaled</string>
+    <string name="tip_calculus_1_line">Only a dentist can remove tartar.</string>
+    <string name="tip_calculus_1_full">Hardened tartar sticks to teeth and can only be removed by professional scaling. Brushing harder will not remove it and can damage your gums.</string>
+    <string name="tip_calculus_2_title">Brush the gumline</string>
+    <string name="tip_calculus_2_line">Angle the brush toward the gums.</string>
+    <string name="tip_calculus_2_full">Hold the brush at about 45 degrees to the gumline and use short, gentle strokes. Tartar builds up fastest behind the lower front teeth.</string>
+    <string name="tip_calculus_3_title">Regular cleanings</string>
+    <string name="tip_calculus_3_line">Every 6 months keeps it away.</string>
+    <string name="tip_calculus_3_full">A professional cleaning about every 6 months stops tartar from building up and protects your gums.</string>
+
+    <string name="tip_gingivitis_1_title">Be gentle</string>
+    <string name="tip_gingivitis_1_line">Soft brush, light pressure.</string>
+    <string name="tip_gingivitis_1_full">Use a soft toothbrush and light pressure along the gumline. Brushing too hard can make gums recede.</string>
+    <string name="tip_gingivitis_2_title">Floss daily</string>
+    <string name="tip_gingivitis_2_line">Cleans where brushing cannot reach.</string>
+    <string name="tip_gingivitis_2_full">Floss once a day between all teeth, curving the floss around each tooth. Your gums may bleed at first, which usually settles within a couple of weeks.</string>
+    <string name="tip_gingivitis_3_title">Watch for signs</string>
+    <string name="tip_gingivitis_3_line">Do not ignore bleeding or swelling.</string>
+    <string name="tip_gingivitis_3_full">Red, swollen or bleeding gums, or persistent bad breath, mean the inflammation is still active. See a dentist if they do not improve.</string>
+
+    <string name="tip_general_1_title">Regular check-ups</string>
+    <string name="tip_general_1_line">See a dentist every 6 months.</string>
+    <string name="tip_general_1_full">Regular check-ups catch problems early, when treatment is simplest. Make a visit every 6 months a habit.</string>
 </resources>

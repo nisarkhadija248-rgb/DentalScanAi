@@ -21,6 +21,9 @@ interface ScanDao {
     @Query("SELECT * FROM scans WHERE userId = :userId AND condition = :condition ORDER BY timestamp DESC")
     fun getScansByCondition(userId: String, condition: String): Flow<List<ScanEntity>>
 
+    @Query("UPDATE scans SET checkedSteps = :checkedSteps WHERE id = :scanId")
+    suspend fun updateCheckedSteps(scanId: Long, checkedSteps: String?)
+
     @Delete
     suspend fun deleteScan(scan: ScanEntity)
 

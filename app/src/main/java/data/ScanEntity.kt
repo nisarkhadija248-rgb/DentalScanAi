@@ -17,7 +17,10 @@ data class ScanEntity(
     val confidence: Float = 0f,
     val severity: String = "",
     val boundingBoxes: String = "",
-    val notes: String = ""
+    val notes: String = "",
+    // JSON array of the Action Plan step indices the user has ticked, e.g. "[0,2]".
+    // null = nothing ticked yet (also what scans saved before this column existed read as).
+    val checkedSteps: String? = null
 ) {
     // Helper: get thumbnail (always first image)
     fun getThumbnailPath(): String {

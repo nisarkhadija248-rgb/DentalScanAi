@@ -17,4 +17,79 @@
     <string name="high_confidence">زیادہ یقین</string>
     <string name="medium_confidence">درمیانی یقین</string>
     <string name="low_confidence">کم یقین</string>
+
+    <!-- ===================== ایکشن پلان ===================== -->
+
+    <!-- Header by urgency -->
+    <string name="plan_header_high">فوری کارروائی ضروری ہے</string>
+    <string name="plan_header_medium">کارروائی تجویز کی جاتی ہے</string>
+    <string name="plan_header_low">دیکھ بھال جاری رکھنا ضروری ہے</string>
+
+    <!-- Headline by urgency -->
+    <string name="plan_headline_high">فوری: 2 ہفتوں کے اندر ڈینٹسٹ سے ملیں</string>
+    <string name="plan_headline_medium">1 سے 3 ماہ کے اندر ڈینٹسٹ سے ملیں</string>
+    <string name="plan_headline_low">اپنا معمول برقرار رکھیں اور اگلے معائنے میں ڈینٹسٹ کو بتائیں</string>
+    <string name="plan_multiple_found">%1$d بیماریاں پائی گئیں</string>
+
+    <!-- Dentist step by urgency -->
+    <string name="plan_step_dentist_high">اگلے 2 ہفتوں میں ڈینٹسٹ سے ملیں، اور درد، سوجن یا حساسیت ہو تو فوراً رجوع کریں۔</string>
+    <string name="plan_step_dentist_medium">اگلے 1 سے 3 ماہ میں ڈینٹسٹ کا وقت لیں۔</string>
+    <string name="plan_step_dentist_low">ہر 6 ماہ کے باقاعدہ معائنے میں ان نتائج کا ذکر ڈینٹسٹ سے کریں۔</string>
+
+    <!-- Condition-specific steps -->
+    <string name="plan_step_caries_1">میٹھی اور تیزابی غذاؤں اور مشروبات کو کم کریں، خاص طور پر کھانوں کے درمیان اور سونے سے پہلے۔</string>
+    <string name="plan_step_caries_2">متاثرہ دانتوں کو فلورائیڈ ٹوتھ پیسٹ سے نرمی سے برش کریں، اور ڈینٹسٹ کو دکھانے تک ان پر سخت چیزیں چبانے سے پرہیز کریں۔</string>
+    <string name="plan_step_calculus_1">پیشہ ورانہ صفائی (سکیلنگ) کروائیں، کیونکہ ٹارٹر گھر پر برش کرنے سے نہیں اترتا۔</string>
+    <string name="plan_step_calculus_2">دن میں دو بار مسوڑھوں کی لکیر کے ساتھ برش کریں اور نیا ٹارٹر جمنے کو سست کرنے کے لیے اینٹی بیکٹیریل ماؤتھ واش استعمال کریں۔</string>
+    <string name="plan_step_gingivitis_1">دن میں دو بار مسوڑھوں کی لکیر کے ساتھ نرمی سے برش کریں اور پلاک ہٹانے کے لیے روزانہ فلاس کریں۔ باقاعدہ نرم صفائی سے مسوڑھوں سے خون آنا اکثر کم ہو جاتا ہے۔</string>
+    <string name="plan_step_gingivitis_2">اینٹی بیکٹیریل ماؤتھ واش سے کلی کریں، اور مسوڑھے ٹھیک ہونے تک سگریٹ اور تمباکو سے پرہیز کریں۔</string>
+
+    <!-- General prevention steps (always last) -->
+    <string name="plan_step_general_1">دن میں دو بار، 2 منٹ تک فلورائیڈ ٹوتھ پیسٹ سے برش کریں۔</string>
+    <string name="plan_step_general_2">روزانہ فلاس کریں اور پانی زیادہ پئیں، خاص طور پر کھانے کے بعد۔</string>
+
+    <!-- Checklist UI -->
+    <string name="plan_progress">%2$d میں سے %1$d مراحل مکمل</string>
+    <string name="plan_congrats">شاباش! اسی طرح جاری رکھیں</string>
+    <string name="plan_step_check_desc">مرحلہ %1$d مکمل کریں</string>
+    <string name="plan_step_uncheck_desc">مرحلہ %1$d مکمل ہو چکا، واپس لینے کے لیے ٹیپ کریں</string>
+
+    <!-- Quick tips -->
+    <string name="plan_quick_tips">فوری مشورے</string>
+    <string name="tip_tap_more">مزید پڑھیں</string>
+    <string name="tip_tap_less">کم دکھائیں</string>
+
+    <string name="tip_caries_1_title">چینی کم کریں</string>
+    <string name="tip_caries_1_line">چینی سڑن کے بیکٹیریا کی غذا ہے۔</string>
+    <string name="tip_caries_1_full">میٹھے ناشتے اور مشروبات ان بیکٹیریا کو خوراک دیتے ہیں جو کیویٹی بناتے ہیں۔ میٹھی چیزیں سارا دن نہیں بلکہ صرف کھانے کے وقت کھائیں اور بعد میں پانی سے کلی کریں۔</string>
+    <string name="tip_caries_2_title">فلورائیڈ مفید ہے</string>
+    <string name="tip_caries_2_line">فلورائیڈ اینیمل کو مضبوط کرتا ہے۔</string>
+    <string name="tip_caries_2_full">دن میں دو بار فلورائیڈ ٹوتھ پیسٹ استعمال کریں۔ فلورائیڈ اینیمل کے ابتدائی نقصان کی مرمت میں مدد دیتا ہے اور دانتوں کو تیزاب کے خلاف مضبوط بناتا ہے۔ برش کے فوراً بعد پانی سے کلی نہ کریں۔</string>
+    <string name="tip_caries_3_title">دیر نہ کریں</string>
+    <string name="tip_caries_3_line">کیویٹی خود ٹھیک نہیں ہوتی۔</string>
+    <string name="tip_caries_3_full">سڑن اینیمل سے آگے بڑھ جائے تو خود ٹھیک نہیں ہوتی۔ آج کی چھوٹی فلنگ بعد کے روٹ کینال سے کہیں آسان ہے، اس لیے جلد ملاقات کا وقت لیں۔</string>
+
+    <string name="tip_calculus_1_title">صفائی کروائیں</string>
+    <string name="tip_calculus_1_line">ٹارٹر صرف ڈینٹسٹ ہٹا سکتا ہے۔</string>
+    <string name="tip_calculus_1_full">سخت ٹارٹر دانتوں سے چپک جاتا ہے اور صرف پیشہ ورانہ سکیلنگ سے ہٹتا ہے۔ زور سے برش کرنے سے یہ نہیں اترتا اور مسوڑھوں کو نقصان پہنچ سکتا ہے۔</string>
+    <string name="tip_calculus_2_title">مسوڑھوں کی لکیر پر برش</string>
+    <string name="tip_calculus_2_line">برش کو مسوڑھوں کی طرف جھکائیں۔</string>
+    <string name="tip_calculus_2_full">برش کو مسوڑھوں کی لکیر کے ساتھ تقریباً 45 ڈگری پر پکڑیں اور چھوٹی نرم حرکات سے برش کریں۔ ٹارٹر سب سے زیادہ نچلے سامنے کے دانتوں کے پیچھے جمتا ہے۔</string>
+    <string name="tip_calculus_3_title">باقاعدہ صفائی</string>
+    <string name="tip_calculus_3_line">ہر 6 ماہ بعد صفائی اسے دور رکھتی ہے۔</string>
+    <string name="tip_calculus_3_full">تقریباً ہر 6 ماہ بعد پیشہ ورانہ صفائی ٹارٹر کو جمنے سے روکتی ہے اور آپ کے مسوڑھوں کی حفاظت کرتی ہے۔</string>
+
+    <string name="tip_gingivitis_1_title">نرمی رکھیں</string>
+    <string name="tip_gingivitis_1_line">نرم برش، ہلکا دباؤ۔</string>
+    <string name="tip_gingivitis_1_full">نرم برش اور مسوڑھوں کی لکیر کے ساتھ ہلکا دباؤ استعمال کریں۔ بہت زور سے برش کرنے سے مسوڑھے پیچھے ہٹ سکتے ہیں۔</string>
+    <string name="tip_gingivitis_2_title">روزانہ فلاس</string>
+    <string name="tip_gingivitis_2_line">وہاں صفائی جہاں برش نہیں پہنچتا۔</string>
+    <string name="tip_gingivitis_2_full">روزانہ ایک بار تمام دانتوں کے درمیان فلاس کریں اور ہر دانت کے گرد دھاگے کو موڑیں۔ شروع میں مسوڑھوں سے خون آ سکتا ہے جو عموماً چند ہفتوں میں رک جاتا ہے۔</string>
+    <string name="tip_gingivitis_3_title">علامات پر نظر رکھیں</string>
+    <string name="tip_gingivitis_3_line">خون یا سوجن کو نظرانداز نہ کریں۔</string>
+    <string name="tip_gingivitis_3_full">مسوڑھوں کا سرخ ہونا، سوجنا یا خون آنا، یا مسلسل بدبو اس بات کی علامت ہے کہ سوزش ابھی موجود ہے۔ بہتری نہ ہو تو ڈینٹسٹ سے ملیں۔</string>
+
+    <string name="tip_general_1_title">باقاعدہ معائنہ</string>
+    <string name="tip_general_1_line">ہر 6 ماہ بعد ڈینٹسٹ سے ملیں۔</string>
+    <string name="tip_general_1_full">باقاعدہ معائنہ مسائل کو ابتدا ہی میں پکڑ لیتا ہے جب علاج سب سے آسان ہوتا ہے۔ ہر 6 ماہ بعد ڈینٹسٹ سے ملنے کی عادت بنائیں۔</string>
 </resources>

@@ -23,7 +23,12 @@ import com.dentalscan.utils.ProfileManager
 import android.widget.LinearLayout
 import com.dentalscan.utils.ConditionEducation
 import com.dentalscan.utils.ConditionStyle
+import com.dentalscan.utils.ActionPlanBuilder
 import com.dentalscan.utils.PhotoLoader
+import android.graphics.Paint
+import android.provider.Settings
+import android.view.animation.OvershootInterpolator
+import kotlinx.coroutines.NonCancellable
 import android.content.res.ColorStateList
 import androidx.core.content.ContextCompat
 import android.animation.ValueAnimator
@@ -74,6 +79,24 @@ class AnalysisActivity : BaseActivity() {
     private lateinit var gaugeContainer: View
     private lateinit var confidenceGauge: CircularProgressIndicator
     private lateinit var confidenceGaugeText: TextView
+    // Quick tips row
+    private lateinit var tipsSection: LinearLayout
+    private lateinit var tipsTitle: TextView
+    private lateinit var tipsList: LinearLayout
+
+    // Action Plan checklist
+    private lateinit var planFoundText: TextView
+    private lateinit var planProgressText: TextView
+    private lateinit var planProgressBar: LinearProgressIndicator
+    private lateinit var planStepsList: LinearLayout
+    private lateinit var planCongratsRow: View
+    private lateinit var planCongratsIcon: ImageView
+    private lateinit var planCongratsText: TextView
+    private var plan: ActionPlanBuilder.Plan? = null
+    private val checkedSteps = mutableSetOf<Int>()
+    private var currentScanId: Long = -1L
+    private var isViewOnlyMode = false
+
     private lateinit var findingsCard: View
     private lateinit var findingsTitle: TextView
     private lateinit var findingsList: LinearLayout
@@ -129,6 +152,16 @@ class AnalysisActivity : BaseActivity() {
         gaugeContainer = findViewById(R.id.gaugeContainer)
         confidenceGauge = findViewById(R.id.confidenceGauge)
         confidenceGaugeText = findViewById(R.id.confidenceGaugeText)
+        tipsSection = findViewById(R.id.tipsSection)
+        tipsTitle = findViewById(R.id.tipsTitle)
+        tipsList = findViewById(R.id.tipsList)
+        planFoundText = findViewById(R.id.planFoundText)
+        planProgressText = findViewById(R.id.planProgressText)
+        planProgressBar = findViewById(R.id.planProgressBar)
+        planStepsList = findViewById(R.id.planStepsList)
+        planCongratsRow = findViewById(R.id.planCongratsRow)
+        planCongratsIcon = findViewById(R.id.planCongratsIcon)
+        planCongratsText = findViewById(R.id.planCongratsText)
         findingsCard = findViewById(R.id.findingsCard)
         findingsTitle = findViewById(R.id.findingsTitle)
         findingsList = findViewById(R.id.findingsList)
@@ -148,10 +181,15 @@ class AnalysisActivity : BaseActivity() {
         retakeButton.setOnClickListener { finish() }
 
         val isViewOnly = intent.getBooleanExtra("view_only", false)
+        isViewOnlyMode = isViewOnly
 
         if (isViewOnly) {
             saveButton.visibility = View.GONE
             retakeButton.visibility = View.GONE
+
+            // Saved scan: which row to update, and which steps were ticked last time
+            currentScanId = intent.getLongExtra("scan_id", -1L)
+            checkedSteps.addAll(ActionPlanBuilder.parseChecked(intent.getStringExtra("checked_steps")))
 
             val condition = intent.getStringExtra("condition") ?: ""
             val confidence = intent.getFloatExtra("confidence", 0f)
@@ -167,7 +205,22 @@ class AnalysisActivity : BaseActivity() {
 
             // Show educational content in view only mode too
             if (condition.isNotEmpty() && severity.isNotEmpty()) {
-                showEducationalContent(condition, severity)
+                lifecycleScope.launch {
+                    // The History list keeps the scans it loaded when it opened, so the ticks it
+                    // passes along can be out of date. The database is the source of truth.
+                    if (currentScanId > 0L) {
+                        val saved = withContext(Dispatchers.IO) {
+                            AppDatabase.getDatabase(this@AnalysisActivity)
+                                .scanDao()
+                                .getScanById(currentScanId)
+                        }
+                        if (saved != null) {
+                            checkedSteps.clear()
+                            checkedSteps.addAll(ActionPlanBuilder.parseChecked(saved.checkedSteps))
+                        }
+                    }
+                    showEducationalContent(condition, severity, savedFindings(condition, confidence))
+                }
             }
 
         } else {
@@ -219,7 +272,12 @@ class AnalysisActivity : BaseActivity() {
 
                 // Inference is very fast on-device; keep the scanning animation visible
                 // long enough to be seen (presentation only, the result is already computed)
-                val remaining = MIN_SCAN_MS - (SystemClock.elapsedRealtime() - startedAt)
+                // (skipped when animations are off, so there is nothing to wait for)
+                val remaining = if (animationsEnabled()) {
+                    MIN_SCAN_MS - (SystemClock.elapsedRealtime() - startedAt)
+                } else {
+                    0L
+                }
                 if (remaining > 0) kotlinx.coroutines.delay(remaining)
 
                 withContext(Dispatchers.Main) {
@@ -288,27 +346,33 @@ class AnalysisActivity : BaseActivity() {
         }
 
         // Show educational content after results
-        showEducationalContent(condition, severity)
+        showEducationalContent(
+            condition,
+            severity,
+            currentDetections.map { ActionPlanBuilder.Finding(it.className, it.confidence) }
+        )
     }
 
-    private fun showEducationalContent(condition: String, severity: String) {
+    /** Conditions of a saved scan: every saved detection, or just the main one for older scans. */
+    private fun savedFindings(condition: String, confidence: Float): List<ActionPlanBuilder.Finding> {
+        val fromBoxes = parseSavedDetections(intent.getStringExtra("bounding_boxes"))
+            .map { ActionPlanBuilder.Finding(it.first, it.second) }
+        return if (fromBoxes.any { ConditionStyle.of(it.condition) != null }) {
+            fromBoxes
+        } else {
+            listOf(ActionPlanBuilder.Finding(condition, confidence))
+        }
+    }
+
+    private fun showEducationalContent(
+        condition: String,
+        severity: String,
+        findings: List<ActionPlanBuilder.Finding>
+    ) {
         val isUrdu = LanguageManager.isUrdu(this)
 
-        // Option C — Action Plan Card
-        val actionPlan = ConditionEducation.getActionPlan(condition, severity, isUrdu)
-        actionPlanTitle.text = if (isUrdu) "کیا کریں؟" else "Action Plan"
-        actionPlanText.text = actionPlan.message
-
-        // Stripe carries the condition color; the icon shape carries the urgency
-        actionPlanStripe.setBackgroundColor(ConditionStyle.color(this, condition))
-        actionPlanIcon.setImageResource(
-            when (actionPlan.urgency) {
-                "high" -> R.drawable.ic_warning
-                "medium" -> R.drawable.ic_info
-                else -> R.drawable.ic_check_circle
-            }
-        )
-        actionPlanCard.visibility = View.VISIBLE
+        // Interactive Action Plan (numbered steps with checkboxes)
+        val aboutDelay = renderActionPlan(findings, isUrdu)
 
         // Option A — Condition Info Card
         val info = ConditionEducation.getConditionInfo(condition, isUrdu)
@@ -341,8 +405,8 @@ class AnalysisActivity : BaseActivity() {
             }
         }
 
-        // Cards glide in one after another, after the gauge has started filling
-        revealStaggered(listOf(actionPlanCard, conditionInfoCard), baseDelay = 450L)
+        // "About this condition" glides in last, after the plan and the tips
+        playIn(conditionInfoCard, aboutDelay, dy = dp(24).toFloat())
     }
 
     // ---------- Visual helpers (styling only) ----------
@@ -411,6 +475,225 @@ class AnalysisActivity : BaseActivity() {
         }
     }
 
+    // ---------- Interactive Action Plan ----------
+
+    /**
+     * Builds the header, headline, numbered step cards and progress for the detected conditions.
+     * Returns the delay (ms) at which the card after the tips ("About this condition") should appear.
+     */
+    private fun renderActionPlan(findings: List<ActionPlanBuilder.Finding>, isUrdu: Boolean): Long {
+        val p = ActionPlanBuilder.build(this, findings)
+        plan = p
+
+        // Severity colors live inside this card only (condition colors are used everywhere else)
+        val accentRes = when (p.urgency) {
+            ActionPlanBuilder.Urgency.HIGH -> R.color.caries_red
+            ActionPlanBuilder.Urgency.MEDIUM -> R.color.calculus_orange
+            ActionPlanBuilder.Urgency.LOW -> R.color.healthy_green
+        }
+        // Orange is too light for text on a white card, so the medium header text uses a deeper orange
+        val headerTextRes =
+            if (p.urgency == ActionPlanBuilder.Urgency.MEDIUM) R.color.notice_fg else accentRes
+        val accent = ContextCompat.getColor(this, accentRes)
+        val headerColor = ContextCompat.getColor(this, headerTextRes)
+
+        actionPlanTitle.text = p.header
+        actionPlanTitle.setTextColor(headerColor)
+        actionPlanText.text = p.headline
+        actionPlanStripe.setBackgroundColor(accent)
+        actionPlanIcon.setImageResource(
+            when (p.urgency) {
+                ActionPlanBuilder.Urgency.HIGH -> R.drawable.ic_warning
+                ActionPlanBuilder.Urgency.MEDIUM -> R.drawable.ic_info
+                ActionPlanBuilder.Urgency.LOW -> R.drawable.ic_check_circle
+            }
+        )
+        actionPlanIcon.imageTintList = ColorStateList.valueOf(headerColor)
+
+        if (p.foundLine != null) {
+            val names = p.conditions.joinToString(" · ") { ConditionStyle.displayName(it, isUrdu) }
+            planFoundText.text = "${p.foundLine}: $names"
+            planFoundText.visibility = View.VISIBLE
+        } else {
+            planFoundText.visibility = View.GONE
+        }
+
+        // Ignore any restored tick that no longer matches a step
+        checkedSteps.retainAll { it in p.steps.indices }
+
+        val numberTextColor = ContextCompat.getColor(
+            this,
+            if (p.urgency == ActionPlanBuilder.Urgency.MEDIUM) R.color.color_on_yellow else R.color.white
+        )
+
+        planStepsList.removeAllViews()
+        p.steps.forEachIndexed { index, stepText ->
+            val row = layoutInflater.inflate(R.layout.item_action_step, planStepsList, false) as MaterialCardView
+            val number = row.findViewById<TextView>(R.id.stepNumber)
+            number.text = (index + 1).toString()
+            number.backgroundTintList = ColorStateList.valueOf(accent)
+            number.setTextColor(numberTextColor)
+            row.findViewById<TextView>(R.id.stepText).text = stepText
+            row.setOnClickListener { toggleStep(index, row) }
+            applyStepState(row, index, animate = false)
+            planStepsList.addView(row)
+            // Steps appear one by one
+            playIn(row, stepDelay(index), dy = dp(20).toFloat(), duration = 300L)
+        }
+
+        planProgressBar.setIndicatorColor(accent)
+        updateChecklistProgress(animate = false)
+        actionPlanCard.visibility = View.VISIBLE
+        playIn(actionPlanCard, PLAN_CARD_DELAY_MS, dy = dp(24).toFloat())
+
+        // Tips slide in once the last step is on its way
+        val tipsStart = stepDelay(p.steps.lastIndex) + 200L
+        return renderQuickTips(p.tips, tipsStart)
+    }
+
+    // ---------- Quick tips ----------
+
+    /** Compact tip cards for the detected condition(s). Collapsed by default; tap to expand. */
+    private fun renderQuickTips(tips: List<ActionPlanBuilder.Tip>, baseDelay: Long): Long {
+        tipsList.removeAllViews()
+        if (tips.isEmpty()) {
+            tipsSection.visibility = View.GONE
+            return baseDelay
+        }
+
+        tipsTitle.text = getString(R.string.plan_quick_tips)
+
+        tips.forEach { tip ->
+            val card = layoutInflater.inflate(R.layout.item_quick_tip, tipsList, false) as MaterialCardView
+            card.findViewById<ImageView>(R.id.tipIcon).setImageResource(tip.iconRes)
+            card.findViewById<TextView>(R.id.tipTitle).text = tip.title
+            card.findViewById<TextView>(R.id.tipSummary).text = tip.summary
+            card.findViewById<TextView>(R.id.tipFull).text = tip.fullText
+            card.findViewById<TextView>(R.id.tipMore).text = getString(R.string.tip_tap_more)
+            card.setOnClickListener { toggleTip(card) }
+            tipsList.addView(card)
+        }
+
+        tipsSection.visibility = View.VISIBLE
+        slideInTips(baseDelay)
+        // The next card starts after the last tip has begun to slide in
+        return baseDelay + TIP_STAGGER_MS * tips.size
+    }
+
+    /** Expand inline to show the full tip (card also gets wider); tap again to collapse. */
+    private fun toggleTip(card: MaterialCardView) {
+        val full = card.findViewById<TextView>(R.id.tipFull)
+        val more = card.findViewById<TextView>(R.id.tipMore)
+        val chevron = card.findViewById<ImageView>(R.id.tipChevron)
+        val expanding = full.visibility != View.VISIBLE
+
+        // Smooth grow / shrink of the card and the row
+        android.transition.TransitionManager.beginDelayedTransition(
+            tipsSection,
+            android.transition.AutoTransition().setDuration(220)
+        )
+
+        full.visibility = if (expanding) View.VISIBLE else View.GONE
+        more.text = getString(if (expanding) R.string.tip_tap_less else R.string.tip_tap_more)
+        card.layoutParams = card.layoutParams.apply { width = dp(if (expanding) 264 else 160) }
+        chevron.animate().rotation(if (expanding) 180f else 0f).setDuration(200).start()
+    }
+
+    /** Tip cards slide in from the right, one after the other. */
+    private fun slideInTips(baseDelay: Long) {
+        for (i in 0 until tipsList.childCount) {
+            playIn(tipsList.getChildAt(i), baseDelay + i * TIP_STAGGER_MS, dx = dp(72).toFloat())
+        }
+    }
+
+    /** Ticked: green check, soft green card, struck-through text. Unticked: empty circle. */
+    private fun applyStepState(row: MaterialCardView, index: Int, animate: Boolean) {
+        val checked = index in checkedSteps
+        val text = row.findViewById<TextView>(R.id.stepText)
+        val check = row.findViewById<ImageView>(R.id.stepCheck)
+
+        row.setCardBackgroundColor(
+            ContextCompat.getColor(this, if (checked) R.color.healthy_bg else R.color.surface_white)
+        )
+        row.strokeColor =
+            ContextCompat.getColor(this, if (checked) R.color.healthy_green else R.color.divider)
+
+        text.paintFlags = if (checked) {
+            text.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+        } else {
+            text.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+        }
+        text.alpha = if (checked) 0.75f else 1f
+
+        check.setImageResource(if (checked) R.drawable.ic_check_circle else R.drawable.ic_radio_unchecked)
+        check.imageTintList = ColorStateList.valueOf(
+            ContextCompat.getColor(this, if (checked) R.color.healthy_green else R.color.text_secondary)
+        )
+        check.contentDescription = getString(
+            if (checked) R.string.plan_step_uncheck_desc else R.string.plan_step_check_desc,
+            index + 1
+        )
+
+        if (animate) {
+            check.scaleX = 0.6f
+            check.scaleY = 0.6f
+            check.animate().scaleX(1f).scaleY(1f).setDuration(220)
+                .setInterpolator(OvershootInterpolator()).start()
+        }
+    }
+
+    private fun toggleStep(index: Int, row: MaterialCardView) {
+        if (!checkedSteps.add(index)) checkedSteps.remove(index)
+        applyStepState(row, index, animate = true)
+        updateChecklistProgress(animate = true)
+        persistChecklist()
+    }
+
+    /** "2 of 4 steps completed", the progress bar, and the congratulations message at 100%. */
+    private fun updateChecklistProgress(animate: Boolean) {
+        val total = plan?.steps?.size ?: 0
+        val done = checkedSteps.count { it in 0 until total }
+
+        planProgressText.text = getString(R.string.plan_progress, done, total)
+        planProgressBar.max = maxOf(total, 1)
+        planProgressBar.setProgressCompat(done, animate)
+
+        val complete = total > 0 && done == total
+        if (complete) {
+            val wasHidden = planCongratsRow.visibility != View.VISIBLE
+            planCongratsText.text = getString(R.string.plan_congrats)
+            planCongratsRow.visibility = View.VISIBLE
+            if (wasHidden && animate) {
+                // Green check pops in
+                planCongratsIcon.scaleX = 0f
+                planCongratsIcon.scaleY = 0f
+                planCongratsIcon.animate().scaleX(1f).scaleY(1f).setDuration(450)
+                    .setInterpolator(OvershootInterpolator(2.5f)).start()
+                planCongratsRow.alpha = 0f
+                planCongratsRow.animate().alpha(1f).setDuration(250).start()
+            }
+        } else {
+            planCongratsRow.visibility = View.GONE
+        }
+    }
+
+    /**
+     * Opened from History: save every tick straight away.
+     * New scan: nothing is saved yet. The ticks are kept in memory and written together with the
+     * scan when Save Scan is tapped (see saveScan).
+     */
+    private fun persistChecklist() {
+        if (!isViewOnlyMode || currentScanId <= 0L) return
+        val encoded = ActionPlanBuilder.encodeChecked(checkedSteps)
+        val scanId = currentScanId
+        // NonCancellable: still finish the write if the user leaves the screen right after ticking
+        lifecycleScope.launch(Dispatchers.IO + NonCancellable) {
+            AppDatabase.getDatabase(this@AnalysisActivity)
+                .scanDao()
+                .updateCheckedSteps(scanId, encoded)
+        }
+    }
+
     /** Reads the detections that were saved with a scan (JSON written by detectionsToJson). */
     private fun parseSavedDetections(json: String?): List<Pair<String, Float>> {
         if (json.isNullOrBlank()) return emptyList()
@@ -469,22 +752,58 @@ class AnalysisActivity : BaseActivity() {
         }
 
         findingsCard.visibility = View.VISIBLE
-        revealStaggered(listOf(findingsCard), baseDelay = 350L)
+        playIn(findingsCard, FINDINGS_DELAY_MS, dy = dp(24).toFloat())
     }
 
-    /** Fade + slide each view up into place, one after the other. */
-    private fun revealStaggered(views: List<View>, baseDelay: Long) {
-        views.forEachIndexed { i, v ->
-            v.alpha = 0f
-            v.translationY = dp(24).toFloat()
-            v.animate()
-                .alpha(1f)
-                .translationY(0f)
-                .setDuration(350)
-                .setStartDelay(baseDelay + i * 140L)
-                .start()
-        }
+    // ---------- Result animation sequence ----------
+    //
+    //   0 ms    result header card pops in
+    //   150 ms  confidence gauge fills
+    //   400 ms  detected-regions card
+    //   600 ms  Action Plan card
+    //   700 ms  plan steps, one by one (first 4 every 200 ms, the rest every 100 ms)
+    //   after   quick tips slide in from the right, then the "About this condition" card
+    //
+    // With "Remove animations" / animation scale 0 in the phone's settings, everything
+    // appears instantly in its final state.
+
+    /** False when the user has turned system animations off (reduce motion). */
+    private fun animationsEnabled(): Boolean = try {
+        Settings.Global.getFloat(contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) > 0f
+    } catch (e: Exception) {
+        true
     }
+
+    /** Fade a view in from an offset after [delay] ms. Shows it instantly if animations are off. */
+    private fun playIn(
+        view: View,
+        delay: Long,
+        dx: Float = 0f,
+        dy: Float = 0f,
+        duration: Long = 350L
+    ) {
+        if (!animationsEnabled()) {
+            view.alpha = 1f
+            view.translationX = 0f
+            view.translationY = 0f
+            return
+        }
+        view.alpha = 0f
+        view.translationX = dx
+        view.translationY = dy
+        view.animate()
+            .alpha(1f)
+            .translationX(0f)
+            .translationY(0f)
+            .setDuration(duration)
+            .setStartDelay(delay)
+            .setInterpolator(DecelerateInterpolator())
+            .start()
+    }
+
+    /** When plan step [index] starts appearing. */
+    private fun stepDelay(index: Int): Long =
+        STEPS_START_MS + if (index < 4) 200L * index else 200L * 3 + 100L * (index - 3)
 
     /** Hides the loading bar and stops the scanning animation. */
     private fun hideLoading() {
@@ -494,6 +813,9 @@ class AnalysisActivity : BaseActivity() {
 
     /** A bright line sweeps up and down over the photo while the model runs. */
     private fun startScanAnimation() {
+        // Reduce motion: no sweeping line or pulsing title, the loading bar is enough
+        if (!animationsEnabled()) return
+
         scanOverlay.visibility = View.VISIBLE
         scanOverlay.alpha = 1f
 
@@ -546,8 +868,14 @@ class AnalysisActivity : BaseActivity() {
         gaugeContainer.visibility = View.VISIBLE
 
         gaugeAnimator?.cancel()
+        if (!animationsEnabled()) {
+            confidenceGauge.setProgressCompat(target, false)
+            confidenceGaugeText.text = "$target%"
+            return
+        }
         gaugeAnimator = ValueAnimator.ofInt(0, target).apply {
-            duration = 1000
+            startDelay = GAUGE_DELAY_MS
+            duration = 800
             interpolator = DecelerateInterpolator()
             addUpdateListener { a ->
                 val v = a.animatedValue as Int
@@ -609,10 +937,15 @@ class AnalysisActivity : BaseActivity() {
         confidenceBar.visibility = View.GONE
         showGauge(color, confidencePct)
 
-        // Small "pop" so the result card feels like it lands
-        resultCard.scaleX = 0.96f
-        resultCard.scaleY = 0.96f
-        resultCard.animate().scaleX(1f).scaleY(1f).setDuration(300).start()
+        // Small "pop" so the result card feels like it lands (first step of the sequence)
+        if (animationsEnabled()) {
+            resultCard.scaleX = 0.96f
+            resultCard.scaleY = 0.96f
+            resultCard.animate().scaleX(1f).scaleY(1f).setDuration(300).start()
+        } else {
+            resultCard.scaleX = 1f
+            resultCard.scaleY = 1f
+        }
     }
 
     /** Soft green card with a check icon when nothing was detected. */
@@ -646,7 +979,8 @@ class AnalysisActivity : BaseActivity() {
             condition = detection.className,
             confidence = detection.confidence,
             severity = ImageUtils.getSeverityText(detection.confidence),
-            boundingBoxes = detectionsToJson(currentDetections)
+            boundingBoxes = detectionsToJson(currentDetections),
+            checkedSteps = ActionPlanBuilder.encodeChecked(checkedSteps)
         )
 
         lifecycleScope.launch(Dispatchers.IO) {
@@ -697,5 +1031,12 @@ class AnalysisActivity : BaseActivity() {
     companion object {
         // Minimum time the scanning animation stays on screen (presentation only)
         private const val MIN_SCAN_MS = 1600L
+
+        // Result animation timeline (milliseconds)
+        private const val GAUGE_DELAY_MS = 150L
+        private const val FINDINGS_DELAY_MS = 400L
+        private const val PLAN_CARD_DELAY_MS = 600L
+        private const val STEPS_START_MS = 700L
+        private const val TIP_STAGGER_MS = 110L
     }
 }
