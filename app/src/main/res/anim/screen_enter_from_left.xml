@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Going back: previous screen returns from the left -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@android:interpolator/decelerate_cubic">
+    <translate
+        android:duration="260"
+        android:fromXDelta="-6%p"
+        android:toXDelta="0"/>
+    <alpha
+        android:duration="260"
+        android:fromAlpha="0.7"
+        android:toAlpha="1"/>
+</set>

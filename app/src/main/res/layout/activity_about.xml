@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background_light">
@@ -14,43 +15,55 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:background="@drawable/bg_header"
             android:gravity="center"
-            android:padding="32dp"
-            android:background="@color/primary">
+            android:orientation="vertical"
+            android:paddingStart="24dp"
+            android:paddingTop="24dp"
+            android:paddingEnd="24dp"
+            android:paddingBottom="32dp">
 
-            <ImageView
-                android:layout_width="80dp"
-                android:layout_height="80dp"
-                android:src="@drawable/ic_tooth_logo"
-                android:layout_marginBottom="12dp"/>
+            <FrameLayout
+                android:layout_width="88dp"
+                android:layout_height="88dp"
+                android:layout_marginBottom="12dp"
+                android:background="@drawable/bg_circle_white"
+                android:padding="4dp">
+
+                <ImageView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_tooth_logo"/>
+
+            </FrameLayout>
 
             <TextView
                 android:id="@+id/aboutAppName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="DentalScan AI"
+                android:textColor="@color/white"
                 android:textSize="26sp"
-                android:textStyle="bold"
-                android:textColor="@color/white"/>
+                android:textStyle="bold"/>
 
             <TextView
                 android:id="@+id/aboutVersion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:text="Version 1.0.0"
-                android:textSize="13sp"
-                android:textColor="@color/white"
-                android:layout_marginTop="4dp"/>
+                android:textColor="#E6FFFFFF"
+                android:textSize="13sp"/>
 
             <TextView
                 android:id="@+id/aboutTagline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:text="Smart Dental Health Monitoring"
-                android:textSize="13sp"
-                android:textColor="@color/white"
-                android:layout_marginTop="4dp"/>
+                android:textColor="#E6FFFFFF"
+                android:textSize="13sp"/>
 
         </LinearLayout>
 
@@ -60,14 +73,12 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- University Info Card -->
-            <androidx.cardview.widget.CardView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
+            <!-- Academic information: icon + label/value rows -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp">
+                android:layout_marginBottom="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -75,58 +86,194 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <TextView
-                        android:id="@+id/aboutAcademicTitle"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="🎓 Academic Information"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/primary"
-                        android:layout_marginBottom="12dp"/>
+                        android:layout_marginBottom="16dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/aboutUniversity"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:textColor="@color/text_secondary"
-                        android:layout_marginBottom="4dp"/>
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_marginEnd="10dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_school"
+                            app:tint="?attr/colorPrimary"/>
 
-                    <TextView
-                        android:id="@+id/aboutDepartment"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:textColor="@color/text_secondary"
-                        android:layout_marginBottom="4dp"/>
+                        <TextView
+                            android:id="@+id/aboutAcademicTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Academic Information"
+                            android:textAppearance="@style/TextAppearance.App.Title"/>
 
-                    <TextView
-                        android:id="@+id/aboutSession"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:textColor="@color/text_secondary"
-                        android:layout_marginBottom="4dp"/>
+                    </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/aboutSupervisor"
-                        android:layout_width="wrap_content"
+                    <!-- University -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:textColor="@color/text_secondary"/>
+                        android:layout_marginBottom="14dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginTop="1dp"
+                            android:layout_marginEnd="12dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_account_balance"
+                            app:tint="@color/text_secondary"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/aboutUniversityLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="University"
+                                android:textAppearance="@style/TextAppearance.App.Label"/>
+
+                            <TextView
+                                android:id="@+id/aboutUniversity"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:textAppearance="@style/TextAppearance.App.Body"/>
+
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Department -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="14dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginTop="1dp"
+                            android:layout_marginEnd="12dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_menu_book"
+                            app:tint="@color/text_secondary"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/aboutDepartmentLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Department"
+                                android:textAppearance="@style/TextAppearance.App.Label"/>
+
+                            <TextView
+                                android:id="@+id/aboutDepartment"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:textAppearance="@style/TextAppearance.App.Body"/>
+
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Session -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="14dp"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginTop="1dp"
+                            android:layout_marginEnd="12dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_event"
+                            app:tint="@color/text_secondary"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/aboutSessionLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Session"
+                                android:textAppearance="@style/TextAppearance.App.Label"/>
+
+                            <TextView
+                                android:id="@+id/aboutSession"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:textAppearance="@style/TextAppearance.App.Body"/>
+
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Supervisor -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginTop="1dp"
+                            android:layout_marginEnd="12dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_person"
+                            app:tint="@color/text_secondary"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/aboutSupervisorLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Supervised by"
+                                android:textAppearance="@style/TextAppearance.App.Label"/>
+
+                            <TextView
+                                android:id="@+id/aboutSupervisor"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:textAppearance="@style/TextAppearance.App.Body"/>
+
+                        </LinearLayout>
+                    </LinearLayout>
 
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <!-- Developers Card -->
-            <androidx.cardview.widget.CardView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
+            <!-- Developers -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp">
+                android:layout_marginBottom="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -134,50 +281,110 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <TextView
-                        android:id="@+id/aboutDevelopersTitle"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="👩‍💻 Developed By"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/primary"
-                        android:layout_marginBottom="12dp"/>
+                        android:layout_marginBottom="16dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
 
-                    <TextView
-                        android:id="@+id/aboutDeveloper1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:textColor="@color/text_primary"
-                        android:layout_marginBottom="6dp"/>
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_marginEnd="10dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_code"
+                            app:tint="?attr/colorPrimary"/>
 
-                    <TextView
-                        android:id="@+id/aboutDeveloper2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:textColor="@color/text_primary"
-                        android:layout_marginBottom="6dp"/>
+                        <TextView
+                            android:id="@+id/aboutDevelopersTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Developed By"
+                            android:textAppearance="@style/TextAppearance.App.Title"/>
 
-                    <TextView
-                        android:id="@+id/aboutDeveloper3"
-                        android:layout_width="wrap_content"
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:textColor="@color/text_primary"/>
+                        android:layout_marginBottom="10dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginEnd="12dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_person"
+                            app:tint="@color/text_secondary"/>
+
+                        <TextView
+                            android:id="@+id/aboutDeveloper1"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textAppearance="@style/TextAppearance.App.Body"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginEnd="12dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_person"
+                            app:tint="@color/text_secondary"/>
+
+                        <TextView
+                            android:id="@+id/aboutDeveloper2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textAppearance="@style/TextAppearance.App.Body"/>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginEnd="12dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_person"
+                            app:tint="@color/text_secondary"/>
+
+                        <TextView
+                            android:id="@+id/aboutDeveloper3"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:textAppearance="@style/TextAppearance.App.Body"/>
+
+                    </LinearLayout>
 
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <!-- App Info Card -->
-            <androidx.cardview.widget.CardView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
+            <!-- App information -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp">
+                android:layout_marginBottom="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -185,48 +392,124 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <TextView
-                        android:id="@+id/aboutAppInfoTitle"
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="📱 App Information"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/primary"
-                        android:layout_marginBottom="12dp"/>
+                        android:layout_marginBottom="12dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_marginEnd="10dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_phone_android"
+                            app:tint="?attr/colorPrimary"/>
+
+                        <TextView
+                            android:id="@+id/aboutAppInfoTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="App Information"
+                            android:textAppearance="@style/TextAppearance.App.Title"/>
+
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/aboutAppInfo"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:textColor="@color/text_secondary"
-                        android:lineSpacingExtra="5dp"/>
+                        android:lineSpacingExtra="6dp"
+                        android:textAppearance="@style/TextAppearance.App.Body"
+                        android:textColor="@color/text_secondary"/>
 
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Detection model details -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="20dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_marginEnd="10dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_medical_services"
+                            app:tint="?attr/colorPrimary"/>
+
+                        <TextView
+                            android:id="@+id/aboutModelTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Detection Model"
+                            android:textAppearance="@style/TextAppearance.App.Title"/>
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/aboutModelInfo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:lineSpacingExtra="6dp"
+                        android:textAppearance="@style/TextAppearance.App.Body"
+                        android:textColor="@color/text_secondary"/>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- Disclaimer reminder -->
-            <androidx.cardview.widget.CardView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="#FFF8E1">
+                app:cardBackgroundColor="@color/notice_bg"
+                app:strokeWidth="0dp">
 
-                <TextView
-                    android:id="@+id/aboutDisclaimerNote"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:textSize="12sp"
-                    android:textColor="#E65100"
-                    android:lineSpacingExtra="4dp"
-                    android:gravity="center"/>
+                    android:orientation="horizontal"
+                    android:padding="16dp">
 
-            </androidx.cardview.widget.CardView>
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_marginEnd="12dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_warning"
+                        app:tint="@color/notice_fg"/>
+
+                    <TextView
+                        android:id="@+id/aboutDisclaimerNote"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:lineSpacingExtra="4dp"
+                        android:textColor="@color/notice_fg"
+                        android:textSize="13sp"/>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </LinearLayout>

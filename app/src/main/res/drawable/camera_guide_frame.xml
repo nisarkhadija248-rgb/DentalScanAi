@@ -1,11 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-    <solid android:color="@android:color/transparent"/>
-    <stroke
-        android:width="3dp"
-        android:color="#00FF00"
-        android:dashWidth="10dp"
-        android:dashGap="5dp"/>
-    <corners android:radius="8dp"/>
-</shape>
+<!-- Four rounded corner brackets. White normally, green while the view is "activated" (capture ready). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="300dp"
+    android:height="200dp"
+    android:viewportWidth="300"
+    android:viewportHeight="200">
+    <path
+        android:pathData="M2,32 V16 Q2,2 16,2 H32"
+        android:strokeColor="@color/guide_frame"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"/>
+    <path
+        android:pathData="M268,2 H284 Q298,2 298,16 V32"
+        android:strokeColor="@color/guide_frame"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"/>
+    <path
+        android:pathData="M298,168 V184 Q298,198 284,198 H268"
+        android:strokeColor="@color/guide_frame"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"/>
+    <path
+        android:pathData="M32,198 H16 Q2,198 2,184 V168"
+        android:strokeColor="@color/guide_frame"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"/>
+</vector>

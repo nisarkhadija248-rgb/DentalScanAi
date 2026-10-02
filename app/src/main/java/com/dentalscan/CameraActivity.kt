@@ -5,7 +5,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
+import android.content.res.ColorStateList
 import android.widget.Button
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -34,10 +37,11 @@ class CameraActivity : BaseActivity() {
     private lateinit var stepCounterText: TextView
     private lateinit var stepNameText: TextView
     private lateinit var stepInstructionText: TextView
-    private lateinit var stepIllustrationEmoji: TextView
+    private lateinit var stepIllustrationEmoji: ImageView
     private lateinit var stepIllustrationText: TextView
     private lateinit var stepProgressBar: ProgressBar
-    private lateinit var capturedDotsText: TextView
+    private lateinit var capturedDotsText: LinearLayout
+    private lateinit var guideFrame: View
 
     // ── Camera ─────────────────────────────────────────
     private var imageCapture: ImageCapture? = null
@@ -49,9 +53,9 @@ class CameraActivity : BaseActivity() {
     private val totalSteps = 5
     private val capturedPaths = mutableListOf<String>()
 
-    // Step definitions — emoji, name EN, name UR, instruction EN, instruction UR
+    // Step definitions — icon, name EN, name UR, instruction EN, instruction UR
     data class StepInfo(
-        val emoji: String,
+        val iconRes: Int,
         val nameEn: String,
         val nameUr: String,
         val instructionEn: String,
@@ -63,7 +67,7 @@ class CameraActivity : BaseActivity() {
 
     private val steps = listOf(
         StepInfo(
-            emoji = "😁",
+            iconRes = R.drawable.ic_face,
             nameEn = "Front View",
             nameUr = "سامنے سے",
             instructionEn = "Open your mouth and face the camera directly",
@@ -73,7 +77,7 @@ class CameraActivity : BaseActivity() {
             canSkip = false  // Front view is required
         ),
         StepInfo(
-            emoji = "⬆️",
+            iconRes = R.drawable.ic_arrow_upward,
             nameEn = "Upper Teeth",
             nameUr = "اوپر کے دانت",
             instructionEn = "Tilt head back slightly and show upper teeth",
@@ -83,7 +87,7 @@ class CameraActivity : BaseActivity() {
             canSkip = true
         ),
         StepInfo(
-            emoji = "⬇️",
+            iconRes = R.drawable.ic_arrow_downward,
             nameEn = "Lower Teeth",
             nameUr = "نیچے کے دانت",
             instructionEn = "Tilt head forward slightly and show lower teeth",
@@ -93,7 +97,7 @@ class CameraActivity : BaseActivity() {
             canSkip = true
         ),
         StepInfo(
-            emoji = "⬅️",
+            iconRes = R.drawable.ic_arrow_back,
             nameEn = "Left Side",
             nameUr = "بائیں طرف",
             instructionEn = "Turn head right to show the left side of your teeth",
@@ -103,7 +107,7 @@ class CameraActivity : BaseActivity() {
             canSkip = true
         ),
         StepInfo(
-            emoji = "➡️",
+            iconRes = R.drawable.ic_arrow_forward,
             nameEn = "Right Side",
             nameUr = "دائیں طرف",
             instructionEn = "Turn head left to show the right side of your teeth",
@@ -146,6 +150,7 @@ class CameraActivity : BaseActivity() {
         stepIllustrationText = findViewById(R.id.stepIllustrationText)
         stepProgressBar = findViewById(R.id.stepProgressBar)
         capturedDotsText = findViewById(R.id.capturedDotsText)
+        guideFrame = findViewById(R.id.guideFrame)
     }
 
     // ── Wizard Logic ───────────────────────────────────
@@ -167,7 +172,7 @@ class CameraActivity : BaseActivity() {
         stepProgressBar.progress = currentStep - 1
 
         // Illustration
-        stepIllustrationEmoji.text = step.emoji
+        stepIllustrationEmoji.setImageResource(step.iconRes)
         stepIllustrationText.text = if (isUrdu) step.illustrationUr else step.illustrationEn
 
         // Instruction
@@ -179,9 +184,9 @@ class CameraActivity : BaseActivity() {
 
         // Capture button text
         captureButton.text = if (currentStep == totalSteps) {
-            if (isUrdu) "📷 آخری تصویر" else "📷 Last Photo"
+            if (isUrdu) "آخری تصویر" else "Last Photo"
         } else {
-            if (isUrdu) "📷 تصویر لیں" else "📷 Capture"
+            if (isUrdu) "تصویر لیں" else "Capture"
         }
 
         // Captured dots — green dot = captured, white circle = not yet
@@ -193,24 +198,46 @@ class CameraActivity : BaseActivity() {
         // Reset capture button state for new step
         if (TFLiteHelper.DUMMY_MODE) {
             captureButton.isEnabled = true
-            guidanceText.setBackgroundColor(
-                ContextCompat.getColor(this, android.R.color.holo_green_dark)
-            )
+            setGuidanceReady(true)
         } else {
             captureButton.isEnabled = false
         }
+        guideFrame.isActivated = captureButton.isEnabled
     }
 
     private fun updateCapturedDots() {
-        val dots = StringBuilder()
+        // filled = captured, ring = current step, dim = not yet
         for (i in 1..totalSteps) {
-            dots.append(when {
-                i < currentStep && capturedPaths.size >= i -> "🟢"
-                i == currentStep -> "🔵"
-                else -> "⚪"
-            })
+            val dot = capturedDotsText.getChildAt(i - 1) ?: continue
+            dot.setBackgroundResource(
+                when {
+                    i < currentStep && capturedPaths.size >= i -> R.drawable.dot_done
+                    i == currentStep -> R.drawable.dot_current
+                    else -> R.drawable.dot_todo
+                }
+            )
         }
-        capturedDotsText.text = dots.toString()
+    }
+
+    /** Guidance pill color: green when ready to capture, teal otherwise. */
+    private fun setGuidanceReady(ready: Boolean) {
+        val color = ContextCompat.getColor(
+            this, if (ready) R.color.guidance_ready else R.color.primary_dark
+        )
+        guidanceText.backgroundTintList = ColorStateList.valueOf(color)
+    }
+
+    /** Check icon at the start of the guidance pill, only for the "Perfect" state. */
+    private fun setGuidanceCheckIcon(show: Boolean) {
+        if (!show) {
+            guidanceText.setCompoundDrawablesRelative(null, null, null, null)
+            return
+        }
+        val size = (20 * resources.displayMetrics.density).toInt()
+        val icon = ContextCompat.getDrawable(this, R.drawable.ic_check_circle)?.mutate() ?: return
+        icon.setBounds(0, 0, size, size)
+        icon.setTint(ContextCompat.getColor(this, R.color.white))
+        guidanceText.setCompoundDrawablesRelative(icon, null, null, null)
     }
 
     /**
@@ -314,6 +341,7 @@ class CameraActivity : BaseActivity() {
             "good" -> if (isUrdu) "بہترین! اب تصویر لیں" else "Perfect! Capture now"
             else -> if (isUrdu) "دانتوں کو فریم میں درست رکھیں" else "Position your teeth in the frame"
         }
+        setGuidanceCheckIcon(state == "good")
     }
 
     private fun updateGuidanceFromResult(result: GuidanceAnalyzer.GuidanceResult) {
@@ -336,18 +364,15 @@ class CameraActivity : BaseActivity() {
                     && !result.isTooDark
                     && !result.isTooBlurry
 
-            val bgColor = if (captureButton.isEnabled) {
-                ContextCompat.getColor(this, android.R.color.holo_green_dark)
-            } else {
-                ContextCompat.getColor(this, android.R.color.holo_orange_dark)
-            }
-            guidanceText.setBackgroundColor(bgColor)
+            setGuidanceReady(captureButton.isEnabled)
+            guideFrame.isActivated = captureButton.isEnabled
         }
     }
 
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
         captureButton.isEnabled = false
+        guideFrame.isActivated = false
 
         val photoFile = File(
             externalMediaDirs.first(),
@@ -363,6 +388,7 @@ class CameraActivity : BaseActivity() {
                 override fun onError(exc: ImageCaptureException) {
                     // Scenario 6: capture failed — stay on current step
                     captureButton.isEnabled = true
+                    guideFrame.isActivated = true
                     val isUrdu = LanguageManager.isUrdu(this@CameraActivity)
                     Toast.makeText(
                         baseContext,

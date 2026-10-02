@@ -1,32 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.App.Card"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
-    android:layout_marginVertical="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    android:layout_marginVertical="6dp"
+    android:clickable="true"
+    android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="16dp"
-        android:gravity="center_vertical">
+        android:padding="16dp">
 
         <!-- Avatar -->
         <TextView
             android:id="@+id/avatarText"
             android:layout_width="56dp"
             android:layout_height="56dp"
-            android:gravity="center"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:textColor="@color/white"
+            android:layout_marginEnd="16dp"
             android:background="@drawable/circle_avatar_bg"
-            android:layout_marginEnd="16dp"/>
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:textStyle="bold"/>
 
         <!-- Profile Info -->
         <LinearLayout
@@ -39,36 +40,41 @@
                 android:id="@+id/profileName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_primary"/>
+                android:textAppearance="@style/TextAppearance.App.Title"/>
 
             <TextView
                 android:id="@+id/profileRelationship"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textColor="@color/text_secondary"
-                android:layout_marginTop="2dp"/>
+                android:layout_marginTop="2dp"
+                android:textAppearance="@style/TextAppearance.App.Body"
+                android:textColor="@color/text_secondary"/>
 
             <TextView
                 android:id="@+id/profileAge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="14sp"
-                android:textColor="@color/text_secondary"
-                android:layout_marginTop="2dp"/>
+                android:layout_marginTop="2dp"
+                android:textAppearance="@style/TextAppearance.App.Body"
+                android:textColor="@color/text_secondary"/>
 
-            <!-- Active badge below name -->
+            <!-- "Active" chip below the details -->
             <TextView
                 android:id="@+id/activeIndicator"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="● Active"
-                android:textSize="12sp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_chip_active"
+                android:drawableStart="@drawable/ic_check_sm"
+                android:drawablePadding="4dp"
+                android:drawableTint="@color/healthy_green"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:text="Active"
                 android:textColor="@color/healthy_green"
+                android:textSize="12sp"
                 android:textStyle="bold"
-                android:layout_marginTop="4dp"
                 android:visibility="gone"/>
 
         </LinearLayout>
@@ -78,11 +84,11 @@
             android:id="@+id/btnEditProfile"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@android:drawable/ic_menu_edit"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="Edit Profile"
-            android:tint="@color/primary"/>
+            android:src="@drawable/ic_edit"
+            app:tint="?attr/colorPrimary"/>
 
     </LinearLayout>
 
-</androidx.cardview.widget.CardView>
+</com.google.android.material.card.MaterialCardView>

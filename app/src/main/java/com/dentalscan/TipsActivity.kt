@@ -29,14 +29,16 @@ class TipsActivity : BaseActivity() {
         findViewById<TextView>(R.id.dailyTipText).text = todayTip
 
         // Section titles
+        findViewById<TextView>(R.id.tipOfDayTitle).text =
+            if (isUrdu) "آج کا مشورہ" else "Tip of the Day"
         findViewById<TextView>(R.id.brushingTitle).text =
-            if (isUrdu) "🪥 برش کرنا" else "🪥 Brushing"
+            if (isUrdu) "برش کرنا" else "Brushing"
         findViewById<TextView>(R.id.dietTitle).text =
-            if (isUrdu) "🥗 خوراک" else "🥗 Diet"
+            if (isUrdu) "خوراک" else "Diet"
         findViewById<TextView>(R.id.habitsTitle).text =
-            if (isUrdu) "✅ اچھی عادات" else "✅ Healthy Habits"
+            if (isUrdu) "اچھی عادات" else "Healthy Habits"
         findViewById<TextView>(R.id.warningTitle).text =
-            if (isUrdu) "⚠️ خطرے کی علامات" else "⚠️ Warning Signs"
+            if (isUrdu) "خطرے کی علامات" else "Warning Signs"
 
         // Brushing tips
         findViewById<TextView>(R.id.brushingTips).text = if (isUrdu) """

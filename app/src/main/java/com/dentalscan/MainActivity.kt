@@ -20,6 +20,8 @@ class MainActivity : BaseActivity() {
     private lateinit var btnSettings: Button
     private lateinit var btnTips: Button
     private lateinit var btnAbout: Button
+    private lateinit var heroSubtitle: TextView
+    private lateinit var footerDisclaimer: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,6 +54,10 @@ class MainActivity : BaseActivity() {
         btnProfiles = findViewById(R.id.btnProfiles)
         btnTips = findViewById(R.id.btnTips)
         btnAbout = findViewById(R.id.btnAbout)
+        heroSubtitle = findViewById(R.id.heroSubtitle)
+        footerDisclaimer = findViewById(R.id.footerDisclaimer)
+        // The whole hero card starts a scan, not just the button inside it
+        findViewById<android.view.View>(R.id.heroCard).setOnClickListener { btnStartScan.performClick() }
     }
 
     private fun updateText() {
@@ -68,6 +74,8 @@ class MainActivity : BaseActivity() {
             activeProfileBadge.text = "فعال: $activeName"
             btnTips.text = "دانتوں کے مشورے"
             btnAbout.text = "ایپ کے بارے میں"
+            heroSubtitle.text = "5 زاویوں سے رہنمائی والا اسکین"
+            footerDisclaimer.text = "صرف اسکریننگ کے لیے، طبی تشخیص نہیں"
         } else {
             titleText.text = "DentalScan AI"
             subtitleText.text = "Smart Dental Health Monitoring"
@@ -79,6 +87,8 @@ class MainActivity : BaseActivity() {
             activeProfileBadge.text = "Active: $activeName"
             btnTips.text = "Dental Tips"
             btnAbout.text = "About"
+            heroSubtitle.text = "5-angle guided scan"
+            footerDisclaimer.text = "Screening aid only. Not a medical diagnosis."
         }
     }
 

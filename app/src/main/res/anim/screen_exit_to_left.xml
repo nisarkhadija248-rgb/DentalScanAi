@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Old screen drifts left and dims a little while the new one arrives -->
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:interpolator="@android:interpolator/decelerate_cubic">
+    <translate
+        android:duration="280"
+        android:fromXDelta="0"
+        android:toXDelta="-6%p"/>
+    <alpha
+        android:duration="280"
+        android:fromAlpha="1"
+        android:toAlpha="0.7"/>
+</set>

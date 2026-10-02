@@ -11,8 +11,9 @@ object ImagePreprocessor {
      * 2. Normalize pixel values to 0.0–1.0 float array for TFLite
      */
     fun preprocess(bitmap: Bitmap): FloatArray {
-        val enhanced = applyAdaptiveContrast(bitmap)
-        return normalizeToFloatArray(enhanced)
+        // CLAHE disabled — model trained on raw images
+        // Re-enable applyAdaptiveContrast if testing shows improvement
+        return normalizeToFloatArray(bitmap)
     }
 
     /**

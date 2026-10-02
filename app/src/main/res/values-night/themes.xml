@@ -1,17 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.DentalScanAI"
-        parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary_light</item>
         <item name="colorPrimaryVariant">@color/primary_dark</item>
         <item name="colorOnPrimary">@color/black</item>
         <item name="colorSecondary">@color/secondary</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <item name="android:statusBarColor">@color/primary_dark</item>
+        <item name="colorSecondaryVariant">@color/secondary_dark</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSurface">@color/dark_surface</item>
+        <item name="colorOnSurface">@color/dark_text_primary</item>
+        <item name="colorError">@color/caries_red</item>
+        <item name="android:colorBackground">@color/dark_background</item>
         <item name="android:windowBackground">@color/dark_background</item>
+        <item name="android:statusBarColor">@color/primary_dark</item>
+        <item name="android:windowLightStatusBar">false</item>
         <item name="android:textColorPrimary">@color/dark_text_primary</item>
         <item name="android:textColorSecondary">@color/dark_text_secondary</item>
         <item name="editTextColor">@color/dark_text_primary</item>
         <item name="android:editTextColor">@color/dark_text_primary</item>
+
+        <!-- Smooth slide/fade between screens -->
+        <item name="android:windowAnimationStyle">@style/Animation.App.Activity</item>
+
+        <!-- App-wide widget styles (defined in styles.xml) -->
+        <item name="materialButtonStyle">@style/Widget.App.Button.Primary</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.App.Button.Outlined</item>
+        <item name="materialCardViewStyle">@style/Widget.App.Card</item>
+        <item name="textInputStyle">@style/Widget.App.TextInputLayout</item>
+        <item name="chipStyle">@style/Widget.App.Chip</item>
     </style>
 </resources>

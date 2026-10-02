@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.RadioButton
 import android.widget.RadioGroup
-import android.widget.Switch
+import com.google.android.material.switchmaterial.SwitchMaterial
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -21,14 +21,17 @@ import kotlinx.coroutines.withContext
 
 class SettingsActivity : BaseActivity() {
 
-    private lateinit var notificationSwitch: Switch
-    private lateinit var languageSwitch: Switch
+    private lateinit var notificationSwitch: SwitchMaterial
+    private lateinit var languageSwitch: SwitchMaterial
     private lateinit var statusText: TextView
     private lateinit var saveButton: Button
     private lateinit var notificationTimeText: TextView
     private lateinit var setNotificationButton: Button
     private lateinit var clearHistoryButton: Button
-    private lateinit var themeSwitch: Switch
+    private lateinit var themeSwitch: SwitchMaterial
+    private lateinit var voiceSwitch: SwitchMaterial
+    private lateinit var voiceTitle: TextView
+    private lateinit var voiceDescription: TextView
     private lateinit var themeStatusText: TextView
     private lateinit var frequencyGroup: RadioGroup
     private lateinit var radioDaily: RadioButton
@@ -60,6 +63,9 @@ class SettingsActivity : BaseActivity() {
         clearHistoryButton = findViewById(R.id.clearHistoryButton)
         themeSwitch = findViewById(R.id.themeSwitch)
         themeStatusText = findViewById(R.id.themeStatusText)
+        voiceSwitch = findViewById(R.id.voiceSwitch)
+        voiceTitle = findViewById(R.id.voiceTitle)
+        voiceDescription = findViewById(R.id.voiceDescription)
     }
 
     private fun loadSettings() {
@@ -76,6 +82,11 @@ class SettingsActivity : BaseActivity() {
 
         val notifEnabled = prefs.getBoolean("notification_enabled", false)
         notificationSwitch.isChecked = notifEnabled
+
+        voiceSwitch.isChecked = prefs.getBoolean("voice_enabled", true)
+        voiceTitle.text = if (isUrdu) "آواز کی رہنمائی" else "Voice Feedback"
+        voiceDescription.text =
+            if (isUrdu) "ہدایات اور نتائج بول کر سنائیں" else "Speak instructions and results aloud"
 
         val isDarkMode = prefs.getBoolean("dark_mode", false)
         themeSwitch.isChecked = isDarkMode
@@ -130,6 +141,7 @@ class SettingsActivity : BaseActivity() {
         editor.putInt("notification_minute", selectedMinute)
         editor.putBoolean("dark_mode", newDarkMode)
         editor.putBoolean("notification_enabled", notifEnabled)
+        editor.putBoolean("voice_enabled", voiceSwitch.isChecked)
         editor.putInt("reminder_interval_days", intervalDays)
         editor.apply()
 
@@ -140,6 +152,7 @@ class SettingsActivity : BaseActivity() {
             ReminderScheduler.cancel(this)
         }
 
+        VoiceFeedback.setEnabled(voiceSwitch.isChecked)
         VoiceFeedback.setLanguage(newUrduSetting)
         applyTheme(newDarkMode)
 

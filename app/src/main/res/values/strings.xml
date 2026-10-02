@@ -18,7 +18,7 @@
 
     <!-- Detection Results -->
     <string name="caries_detected">Caries detected</string>
-    <string name="plaque_detected">Plaque detected</string>
+    <string name="gingivitis_detected">Gingivitis detected</string>
     <string name="calculus_detected">Calculus detected</string>
     <string name="no_issues">No dental issues detected</string>
     <string name="healthy_teeth">Your teeth appear healthy</string>

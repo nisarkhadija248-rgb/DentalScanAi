@@ -1,33 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Primary -->
-    <color name="primary">#2196F3</color>
-    <color name="primary_dark">#1976D2</color>
-    <color name="primary_light">#BBDEFB</color>
+    <!-- Primary (medical teal) -->
+    <color name="primary">#0B6E8A</color>
+    <color name="primary_dark">#085468</color>
+    <color name="primary_light">#8ED1E1</color>
 
     <!-- Secondary -->
-    <color name="secondary">#00BCD4</color>
-    <color name="secondary_dark">#0097A7</color>
+    <color name="secondary">#00897B</color>
+    <color name="secondary_dark">#00695C</color>
 
     <!-- Basic -->
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
 
-    <!-- Status -->
-    <color name="caries_red">#F44336</color>
-    <color name="plaque_yellow">#FFC107</color>
-    <color name="calculus_purple">#9C27B0</color>
-    <color name="healthy_green">#4CAF50</color>
+    <!-- Condition colors: Caries = red, Calculus = orange, Gingivitis = yellow -->
+    <color name="caries_red">#D32F2F</color>
+    <color name="calculus_orange">#FB8C00</color>
+    <color name="gingivitis_yellow">#FBC02D</color>
+    <color name="healthy_green">#388E3C</color>
 
-    <!-- Backgrounds -->
-    <color name="background_light">#F5F5F5</color>
+    <!-- Soft tints for chips / card backgrounds -->
+    <color name="caries_bg">#FDECEA</color>
+    <color name="calculus_bg">#FFF3E0</color>
+    <color name="gingivitis_bg">#FFFDE7</color>
+    <color name="healthy_bg">#E8F5E9</color>
+
+    <!-- Camera screen: "ready to capture" green, same in light and dark -->
+    <color name="guidance_ready">#2E7D32</color>
+
+    <!-- Notices / tinted sections (not condition colors) -->
+    <color name="notice_bg">#FFF8E1</color>
+    <color name="notice_fg">#B34700</color>
+    <color name="tint_teal">#E3F2F6</color>
+
+    <!-- Text that sits on a yellow background (white fails contrast on yellow) -->
+    <color name="color_on_yellow">#3E2F00</color>
+
+    <!-- Backgrounds / surfaces -->
+    <color name="background_light">#F5F7F8</color>
     <color name="surface_white">#FFFFFF</color>
-    <color name="text_primary">#212121</color>
-    <color name="text_secondary">#757575</color>
+    <color name="surface_variant">#EEF3F5</color>
+    <color name="divider">#E0E6E8</color>
+    <color name="text_primary">#1B2A30</color>
+    <color name="text_secondary">#5F6E75</color>
 
     <!-- Dark mode colors -->
-    <color name="dark_background">#121212</color>
-    <color name="dark_surface">#1E1E1E</color>
-    <color name="dark_text_primary">#FFFFFF</color>
-    <color name="dark_text_secondary">#BBBBBB</color>
+    <color name="dark_background">#0F1416</color>
+    <color name="dark_surface">#182024</color>
+    <color name="dark_text_primary">#ECF1F3</color>
+    <color name="dark_text_secondary">#A9B6BB</color>
 </resources>

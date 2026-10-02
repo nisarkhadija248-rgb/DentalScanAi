@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- ===================== Screen transitions ===================== -->
+
+    <!-- Applied app-wide through android:windowAnimationStyle in the theme -->
+    <style name="Animation.App.Activity" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/screen_enter_from_right</item>
+        <item name="android:activityOpenExitAnimation">@anim/screen_exit_to_left</item>
+        <item name="android:activityCloseEnterAnimation">@anim/screen_enter_from_left</item>
+        <item name="android:activityCloseExitAnimation">@anim/screen_exit_to_right</item>
+    </style>
+
+    <!-- ===================== Text styles ===================== -->
+
+    <style name="TextAppearance.App.Headline" parent="TextAppearance.MaterialComponents.Headline5">
+        <item name="android:textSize">24sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="TextAppearance.App.Title" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="TextAppearance.App.Body" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:lineSpacingExtra">4dp</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="TextAppearance.App.Caption" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/text_secondary</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
+    <style name="TextAppearance.App.Label" parent="TextAppearance.MaterialComponents.Overline">
+        <item name="android:textSize">11sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:letterSpacing">0.08</item>
+        <item name="android:textColor">@color/text_secondary</item>
+    </style>
+
+    <!-- ===================== Buttons ===================== -->
+
+    <!-- Filled. Applied to every <Button> through materialButtonStyle in the theme. -->
+    <style name="Widget.App.Button.Primary" parent="Widget.MaterialComponents.Button">
+        <item name="android:minHeight">52dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+
+    <style name="Widget.App.Button.Outlined" parent="Widget.MaterialComponents.Button.OutlinedButton">
+        <item name="android:minHeight">52dp</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="android:insetTop">0dp</item>
+        <item name="android:insetBottom">0dp</item>
+        <item name="cornerRadius">12dp</item>
+        <item name="strokeColor">@color/primary</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <style name="Widget.App.Button.Text" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:minHeight">48dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
+        <item name="cornerRadius">12dp</item>
+    </style>
+
+    <!-- White text button with icon, for use on the teal header -->
+    <style name="Widget.App.Button.OnPrimary" parent="Widget.App.Button.Text">
+        <item name="android:minHeight">40dp</item>
+        <item name="android:textSize">13sp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="iconTint">@color/white</item>
+        <item name="iconSize">18dp</item>
+        <item name="iconPadding">6dp</item>
+        <item name="rippleColor">#33FFFFFF</item>
+    </style>
+
+    <!-- Icon-on-top tile used for the Home grid (still a Button, so IDs and listeners are unchanged) -->
+    <style name="Widget.App.Button.Tile" parent="Widget.App.Button.Outlined">
+        <item name="android:minHeight">104dp</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="android:gravity">center</item>
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">16dp</item>
+        <item name="backgroundTint">@color/surface_white</item>
+        <item name="strokeColor">@color/divider</item>
+        <item name="iconGravity">top</item>
+        <item name="iconSize">28dp</item>
+        <item name="iconPadding">8dp</item>
+        <item name="iconTint">?attr/colorPrimary</item>
+    </style>
+
+    <!-- Large white-on-teal text button for the Home hero card -->
+    <style name="Widget.App.Button.Hero" parent="Widget.App.Button.Text">
+        <item name="android:minHeight">56dp</item>
+        <item name="android:textSize">20sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:paddingStart">0dp</item>
+        <item name="iconTint">@color/white</item>
+        <item name="iconSize">32dp</item>
+        <item name="iconPadding">12dp</item>
+        <item name="rippleColor">#33FFFFFF</item>
+    </style>
+
+    <!-- ===================== Cards ===================== -->
+
+    <!-- Flat outlined card: 16dp radius, no elevation, 1dp stroke -->
+    <style name="Widget.App.Card" parent="Widget.MaterialComponents.CardView">
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">0dp</item>
+        <item name="cardBackgroundColor">@color/surface_white</item>
+        <item name="strokeColor">@color/divider</item>
+        <item name="strokeWidth">1dp</item>
+    </style>
+
+    <!-- ===================== Chips ===================== -->
+
+    <style name="Widget.App.Chip" parent="Widget.MaterialComponents.Chip.Action">
+        <item name="android:textAppearance">@style/TextAppearance.App.Caption</item>
+        <item name="android:textColor">@color/text_primary</item>
+        <item name="chipBackgroundColor">@color/surface_variant</item>
+        <item name="chipStrokeColor">@color/divider</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="chipMinHeight">28dp</item>
+        <item name="ensureMinTouchTargetSize">false</item>
+    </style>
+
+    <!-- ===================== Text input ===================== -->
+
+    <style name="Widget.App.TextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">12dp</item>
+        <item name="boxCornerRadiusTopEnd">12dp</item>
+        <item name="boxCornerRadiusBottomStart">12dp</item>
+        <item name="boxCornerRadiusBottomEnd">12dp</item>
+    </style>
+
+</resources>

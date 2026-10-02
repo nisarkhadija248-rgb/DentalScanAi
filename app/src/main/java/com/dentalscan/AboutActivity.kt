@@ -22,35 +22,45 @@ class AboutActivity : BaseActivity() {
         findViewById<TextView>(R.id.aboutTagline).text =
             if (isUrdu) "ذہین دانتوں کی صحت کی نگرانی" else "Smart Dental Health Monitoring"
 
-        // Academic info
+        // Academic info (label / value rows; icons live in the layout)
         findViewById<TextView>(R.id.aboutAcademicTitle).text =
-            if (isUrdu) "🎓 تعلیمی معلومات" else "🎓 Academic Information"
+            if (isUrdu) "تعلیمی معلومات" else "Academic Information"
+
+        findViewById<TextView>(R.id.aboutUniversityLabel).text =
+            if (isUrdu) "یونیورسٹی" else "University"
         findViewById<TextView>(R.id.aboutUniversity).text =
-            if (isUrdu) "🏛️ یونیورسٹی: شہید بے نظیر بھٹو ویمن یونیورسٹی، پشاور"
-            else "🏛️ University: Shaheed Benazir Bhutto Women University, Peshawar"
+            if (isUrdu) "شہید بے نظیر بھٹو ویمن یونیورسٹی، پشاور"
+            else "Shaheed Benazir Bhutto Women University, Peshawar"
+
+        findViewById<TextView>(R.id.aboutDepartmentLabel).text =
+            if (isUrdu) "شعبہ" else "Department"
         findViewById<TextView>(R.id.aboutDepartment).text =
-            if (isUrdu) "📚 شعبہ: کمپیوٹر سائنس | BS کمپیوٹر سائنس"
-            else "📚 Department: Computer Science | BS Computer Science"
+            if (isUrdu) "کمپیوٹر سائنس | BS کمپیوٹر سائنس"
+            else "Computer Science | BS Computer Science"
+
+        findViewById<TextView>(R.id.aboutSessionLabel).text =
+            if (isUrdu) "سیشن" else "Session"
         findViewById<TextView>(R.id.aboutSession).text =
-            if (isUrdu) "📅 سیشن: 2022–2026 | گروپ 6"
-            else "📅 Session: 2022–2026 | Group 6"
-        findViewById<TextView>(R.id.aboutSupervisor).text =
-            if (isUrdu) "👩‍🏫 نگران: Ma'am Naveen"
-            else "👩‍🏫 Supervised by: Ma'am Naveen"
+            if (isUrdu) "2022–2026 | گروپ 6"
+            else "2022–2026 | Group 6"
+
+        findViewById<TextView>(R.id.aboutSupervisorLabel).text =
+            if (isUrdu) "نگران" else "Supervised by"
+        findViewById<TextView>(R.id.aboutSupervisor).text = "Ma'am Naveen"
 
         // Developers
         findViewById<TextView>(R.id.aboutDevelopersTitle).text =
-            if (isUrdu) "👩‍💻 تیار کردہ" else "👩‍💻 Developed By"
+            if (isUrdu) "تیار کردہ" else "Developed By"
         findViewById<TextView>(R.id.aboutDeveloper1).text =
-            "• Khadija Nisar — Roll No. 05"
+            "Khadija Nisar — Roll No. 05"
         findViewById<TextView>(R.id.aboutDeveloper2).text =
-            "• Aleena Khan — Roll No. 15"
+            "Aleena Khan — Roll No. 15"
         findViewById<TextView>(R.id.aboutDeveloper3).text =
-            "• Alishba — Roll No. 09"
+            "Alishba — Roll No. 09"
 
         // App info
         findViewById<TextView>(R.id.aboutAppInfoTitle).text =
-            if (isUrdu) "📱 ایپ کی معلومات" else "📱 App Information"
+            if (isUrdu) "ایپ کی معلومات" else "App Information"
         findViewById<TextView>(R.id.aboutAppInfo).text =
             if (isUrdu) """
 پلیٹ فارم: اینڈرائیڈ (کم از کم Android 7.1.1)
@@ -70,13 +80,35 @@ Internet: Fully Offline — no internet required
 Purpose: Dental health awareness and education
             """.trimIndent()
 
-        // Disclaimer note
+        // Detection model details (values taken from the app's own model settings)
+        findViewById<TextView>(R.id.aboutModelTitle).text =
+            if (isUrdu) "ڈیٹیکشن ماڈل" else "Detection Model"
+        findViewById<TextView>(R.id.aboutModelInfo).text =
+            if (isUrdu) """
+آرکیٹیکچر: YOLOv8n (نینو آبجیکٹ ڈیٹیکٹر)
+رن ٹائم: TensorFlow Lite (آلے پر)
+ان پٹ سائز: 640 × 640
+کلاسز: 3 (کیریز، کیلکولس، مسوڑوں کی سوزش)
+ڈیٹیکشن حد: 10% اعتماد، NMS IoU 0.45
+ماڈل کا سائز: تقریباً 3.2 MB
+پرائیویسی: تصاویر آپ کے آلے ہی پر رہتی ہیں
+            """.trimIndent() else """
+Architecture: YOLOv8n (nano object detector)
+Runtime: TensorFlow Lite, fully on-device
+Input size: 640 × 640
+Classes: 3 (Caries, Calculus, Gingivitis)
+Detection threshold: 10% confidence, NMS IoU 0.45
+Model size: about 3.2 MB
+Privacy: images never leave your device
+            """.trimIndent()
+
+        // Disclaimer note (warning icon lives in the layout)
         findViewById<TextView>(R.id.aboutDisclaimerNote).text =
             if (isUrdu)
-                "⚠️ یہ ایپ صرف تعلیمی مقاصد کے لیے ہے۔ یہ طبی تشخیص کا متبادل نہیں ہے۔ " +
+                "یہ ایپ صرف تعلیمی مقاصد کے لیے ہے۔ یہ طبی تشخیص کا متبادل نہیں ہے۔ " +
                         "کسی بھی دانتوں کے مسئلے کے لیے مستند ڈینٹسٹ سے رجوع کریں۔"
             else
-                "⚠️ This app is for educational purposes only and does not constitute medical advice. " +
+                "This app is for educational purposes only and does not constitute medical advice. " +
                         "Always consult a qualified dental professional for any dental concerns."
     }
 }

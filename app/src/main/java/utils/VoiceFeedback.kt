@@ -15,7 +15,20 @@ object VoiceFeedback {
     private val ENGLISH_LOCALE = Locale.ENGLISH
     private var currentLocale = ENGLISH_LOCALE
 
+    // Voice on/off switch (Settings). Default is on.
+    private var enabled = true
+
+    fun setEnabled(value: Boolean) {
+        enabled = value
+        if (!value) {
+            pendingMessages.clear()
+            tts?.stop()
+        }
+    }
+
     fun initialize(context: Context) {
+        enabled = context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+            .getBoolean("voice_enabled", true)
         tts = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 isInitialized = true
@@ -48,6 +61,7 @@ object VoiceFeedback {
     }
 
     fun speak(message: String) {
+        if (!enabled) return
         if (!isInitialized) {
             pendingMessages.add(message)
             return
@@ -64,7 +78,7 @@ object VoiceFeedback {
         val message = if (isUrdu) {
             when (condition.lowercase()) {
                 "caries" -> "آپ کے دانتوں میں سڑن پائی گئی ہے۔ $confidence یقین۔"
-                "plaque" -> "آپ کے دانتوں پر پلاک جمع ہے۔ $confidence یقین۔"
+                "gingivitis" -> "آپ کے مسوڑوں میں سوزش ہے۔ $confidence یقین۔"
                 "calculus" -> "آپ کے دانتوں پر پتھر بن گیا ہے۔ $confidence یقین۔"
                 else -> "دانتوں میں کچھ خرابی پائی گئی ہے۔"
             }
@@ -75,7 +89,7 @@ object VoiceFeedback {
     }
 
     fun speakGuidance(message: String) {
-        if (isInitialized) {
+        if (enabled && isInitialized) {
             tts?.speak(message, TextToSpeech.QUEUE_ADD, null, null)
         }
     }

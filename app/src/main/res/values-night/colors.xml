@@ -1,9 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="background_light">#121212</color>
-    <color name="surface_white">#1E1E1E</color>
-    <color name="text_primary">#FFFFFF</color>
-    <color name="text_secondary">#BBBBBB</color>
+    <!-- Backgrounds / surfaces -->
+    <color name="background_light">#0F1416</color>
+    <color name="surface_white">#182024</color>
+    <color name="surface_variant">#222D32</color>
+    <color name="divider">#2C383D</color>
+    <color name="text_primary">#ECF1F3</color>
+    <color name="text_secondary">#A9B6BB</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
+
+    <!-- Condition colors, lightened for dark backgrounds -->
+    <color name="caries_red">#EF5350</color>
+    <color name="calculus_orange">#FFA726</color>
+    <color name="gingivitis_yellow">#FDD835</color>
+    <color name="healthy_green">#66BB6A</color>
+
+    <!-- Dark-safe tints -->
+    <color name="caries_bg">#3B1C1C</color>
+    <color name="calculus_bg">#3A2A12</color>
+    <color name="gingivitis_bg">#383209</color>
+    <color name="healthy_bg">#17301A</color>
+
+    <!-- Notices / tinted sections -->
+    <color name="notice_bg">#332A0E</color>
+    <color name="notice_fg">#FFB74D</color>
+    <color name="tint_teal">#12292F</color>
 </resources>

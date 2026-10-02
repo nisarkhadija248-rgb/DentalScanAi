@@ -1,36 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/background_light">
+    android:background="@color/background_light"
+    android:orientation="vertical">
 
     <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
+        android:background="@drawable/bg_header"
         android:gravity="center"
-        android:padding="32dp"
-        android:background="@color/primary">
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="24dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="28dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="⚕️"
-            android:textSize="48sp"
-            android:layout_marginBottom="8dp"/>
+        <ImageView
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginBottom="8dp"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_medical_services"
+            app:tint="@color/white"/>
 
         <TextView
             android:id="@+id/disclaimerTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:text="Important Notice"
-            android:textSize="24sp"
-            android:textStyle="bold"
             android:textColor="@color/white"
-            android:gravity="center"/>
+            android:textSize="24sp"
+            android:textStyle="bold"/>
 
     </LinearLayout>
 
@@ -44,17 +49,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="24dp">
+            android:padding="20dp">
 
             <!-- Main disclaimer card -->
-            <androidx.cardview.widget.CardView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="#FFF8E1">
+                app:cardBackgroundColor="@color/notice_bg"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -62,34 +66,47 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="⚠️ Not a Medical Device"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        android:textColor="#E65100"
-                        android:layout_marginBottom="12dp"/>
+                        android:layout_marginBottom="12dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_marginEnd="10dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_warning"
+                            app:tint="@color/notice_fg"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Not a Medical Device"
+                            android:textColor="@color/notice_fg"
+                            android:textSize="16sp"
+                            android:textStyle="bold"/>
+
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/disclaimerMainText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="14sp"
-                        android:textColor="@color/text_primary"
+                        android:textAppearance="@style/TextAppearance.App.Body"
                         android:lineSpacingExtra="5dp"/>
 
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- Points card -->
-            <androidx.cardview.widget.CardView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp">
+                android:layout_marginBottom="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -101,32 +118,29 @@
                         android:id="@+id/disclaimerPointsTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_marginBottom="12dp"
                         android:text="Please understand that:"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/text_primary"
-                        android:layout_marginBottom="12dp"/>
+                        android:textAppearance="@style/TextAppearance.App.Title"
+                        android:textSize="15sp"/>
 
                     <TextView
                         android:id="@+id/disclaimerPoints"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:textColor="@color/text_primary"
-                        android:lineSpacingExtra="6dp"/>
+                        android:lineSpacingExtra="6dp"
+                        android:textAppearance="@style/TextAppearance.App.Body"/>
 
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
             <!-- Recommendation card -->
-            <androidx.cardview.widget.CardView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                app:cardBackgroundColor="#E8F5E9">
+                android:layout_marginBottom="16dp"
+                app:cardBackgroundColor="@color/healthy_bg"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -134,25 +148,40 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="✅ Our Recommendation"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="#2E7D32"
-                        android:layout_marginBottom="8dp"/>
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_marginEnd="10dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_check_circle"
+                            app:tint="@color/healthy_green"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Our Recommendation"
+                            android:textColor="@color/healthy_green"
+                            android:textSize="15sp"
+                            android:textStyle="bold"/>
+
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/disclaimerRecommendation"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="13sp"
-                        android:textColor="@color/text_primary"
-                        android:lineSpacingExtra="5dp"/>
+                        android:lineSpacingExtra="5dp"
+                        android:textAppearance="@style/TextAppearance.App.Body"/>
 
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </ScrollView>
@@ -161,28 +190,25 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/surface_white"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:background="@color/background_light">
+        android:padding="16dp">
 
         <CheckBox
             android:id="@+id/checkboxAgree"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
             android:text="I understand this app is for educational purposes only"
-            android:textSize="13sp"
             android:textColor="@color/text_primary"
-            android:layout_marginBottom="12dp"/>
+            android:textSize="13sp"/>
 
         <Button
             android:id="@+id/btnAgree"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:text="I Agree, Continue"
-            android:textSize="16sp"
-            android:textAllCaps="false"
-            android:backgroundTint="@color/primary"
-            android:enabled="false"/>
+            android:enabled="false"
+            android:text="I Agree, Continue"/>
 
     </LinearLayout>
 

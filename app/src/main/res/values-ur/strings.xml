@@ -12,7 +12,7 @@
     <string name="healthy_teeth">آپ کے دانت صحت مند ہیں</string>
     <string name="disclaimer">یہ ایپ صرف آگاہی کے لیے ہے اور پیشہ ورانہ تشخیص کی جگہ نہیں لے سکتی۔</string>
     <string name="caries_detected">کیریز (دانتوں کی سڑن) detected</string>
-    <string name="plaque_detected">پلاک detected</string>
+    <string name="gingivitis_detected">مسوڑوں کی سوزش detected</string>
     <string name="calculus_detected">کیلکولس (پتھر) detected</string>
     <string name="high_confidence">زیادہ یقین</string>
     <string name="medium_confidence">درمیانی یقین</string>

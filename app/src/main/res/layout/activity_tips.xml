@@ -1,36 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="@color/background_light">
+    android:background="@color/background_light"
+    android:orientation="vertical">
 
     <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/bg_header"
         android:orientation="vertical"
-        android:padding="24dp"
-        android:background="@color/primary">
+        android:paddingStart="24dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="24dp"
+        android:paddingBottom="28dp">
 
         <TextView
             android:id="@+id/tipsTitleText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Dental Health Tips"
+            android:textColor="@color/white"
             android:textSize="26sp"
-            android:textStyle="bold"
-            android:textColor="@color/white"/>
+            android:textStyle="bold"/>
 
         <TextView
             android:id="@+id/tipsSubtitleText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:text="Daily tip to keep your teeth healthy"
-            android:textSize="14sp"
-            android:textColor="@color/white"
-            android:layout_marginTop="4dp"/>
+            android:textColor="#E6FFFFFF"
+            android:textSize="14sp"/>
 
     </LinearLayout>
 
@@ -44,166 +48,230 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Daily Tip Card -->
-            <androidx.cardview.widget.CardView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
+            <!-- Tip of the day -->
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp">
+                app:cardBackgroundColor="@color/primary_dark"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:padding="20dp"
-                    android:background="@color/primary">
+                    android:padding="20dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="💡 Tip of the Day"
-                        android:textSize="14sp"
-                        android:textColor="@color/white"
-                        android:layout_marginBottom="8dp"/>
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_marginEnd="8dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_lightbulb"
+                            app:tint="@color/white"/>
+
+                        <TextView
+                            android:id="@+id/tipOfDayTitle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Tip of the Day"
+                            android:textColor="#E6FFFFFF"
+                            android:textSize="14sp"/>
+
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/dailyTipText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textSize="16sp"
+                        android:lineSpacingExtra="4dp"
                         android:textColor="@color/white"
-                        android:textStyle="bold"
-                        android:lineSpacingExtra="4dp"/>
+                        android:textSize="16sp"
+                        android:textStyle="bold"/>
 
                 </LinearLayout>
 
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <!-- Brushing Tips -->
-            <TextView
-                android:id="@+id/brushingTitle"
-                android:layout_width="wrap_content"
+            <!-- Brushing -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="🪥 Brushing"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_primary"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
-                android:layout_marginTop="8dp"/>
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <androidx.cardview.widget.CardView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="8dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_brush"
+                    app:tint="?attr/colorPrimary"/>
+
+                <TextView
+                    android:id="@+id/brushingTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Brushing"
+                    android:textAppearance="@style/TextAppearance.App.Title"/>
+
+            </LinearLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp">
+                app:cardBackgroundColor="@color/tint_teal">
 
                 <TextView
                     android:id="@+id/brushingTips"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:lineSpacingExtra="6dp"
                     android:padding="16dp"
-                    android:textSize="14sp"
-                    android:textColor="@color/text_primary"
-                    android:lineSpacingExtra="6dp"/>
+                    android:textAppearance="@style/TextAppearance.App.Body"/>
 
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <!-- Diet Tips -->
-            <TextView
-                android:id="@+id/dietTitle"
-                android:layout_width="wrap_content"
+            <!-- Diet -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="🥗 Diet"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_primary"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
-                android:layout_marginTop="8dp"/>
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <androidx.cardview.widget.CardView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="8dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_restaurant"
+                    app:tint="@color/healthy_green"/>
+
+                <TextView
+                    android:id="@+id/dietTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Diet"
+                    android:textAppearance="@style/TextAppearance.App.Title"/>
+
+            </LinearLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp">
+                app:cardBackgroundColor="@color/healthy_bg">
 
                 <TextView
                     android:id="@+id/dietTips"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:lineSpacingExtra="6dp"
                     android:padding="16dp"
-                    android:textSize="14sp"
-                    android:textColor="@color/text_primary"
-                    android:lineSpacingExtra="6dp"/>
+                    android:textAppearance="@style/TextAppearance.App.Body"/>
 
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <!-- Habits Tips -->
-            <TextView
-                android:id="@+id/habitsTitle"
-                android:layout_width="wrap_content"
+            <!-- Healthy habits -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="✅ Healthy Habits"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_primary"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
-                android:layout_marginTop="8dp"/>
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <androidx.cardview.widget.CardView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="8dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_check_circle"
+                    app:tint="?attr/colorPrimary"/>
+
+                <TextView
+                    android:id="@+id/habitsTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Healthy Habits"
+                    android:textAppearance="@style/TextAppearance.App.Title"/>
+
+            </LinearLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp">
+                app:cardBackgroundColor="@color/surface_variant">
 
                 <TextView
                     android:id="@+id/habitsTips"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:lineSpacingExtra="6dp"
                     android:padding="16dp"
-                    android:textSize="14sp"
-                    android:textColor="@color/text_primary"
-                    android:lineSpacingExtra="6dp"/>
+                    android:textAppearance="@style/TextAppearance.App.Body"/>
 
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
-            <!-- Warning Signs -->
-            <TextView
-                android:id="@+id/warningTitle"
-                android:layout_width="wrap_content"
+            <!-- Warning signs -->
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="⚠️ Warning Signs"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/text_primary"
+                android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
-                android:layout_marginTop="8dp"/>
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <androidx.cardview.widget.CardView
-                xmlns:app="http://schemas.android.com/apk/res-auto"
+                <ImageView
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="8dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_warning"
+                    app:tint="@color/notice_fg"/>
+
+                <TextView
+                    android:id="@+id/warningTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Warning Signs"
+                    android:textAppearance="@style/TextAppearance.App.Title"/>
+
+            </LinearLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                style="@style/Widget.App.Card"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="24dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="2dp">
+                app:cardBackgroundColor="@color/notice_bg">
 
                 <TextView
                     android:id="@+id/warningTips"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:lineSpacingExtra="6dp"
                     android:padding="16dp"
-                    android:textSize="14sp"
-                    android:textColor="@color/text_primary"
-                    android:lineSpacingExtra="6dp"/>
+                    android:textAppearance="@style/TextAppearance.App.Body"/>
 
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
     </ScrollView>
