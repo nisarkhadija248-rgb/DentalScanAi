@@ -10,13 +10,16 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         val prefs = getSharedPreferences("settings", MODE_PRIVATE)
+        val onboardingDone = prefs.getBoolean("onboarding_complete", false)
         val disclaimerAccepted = prefs.getBoolean("disclaimer_accepted", false)
 
-        if (disclaimerAccepted) {
-            startActivity(Intent(this, MainActivity::class.java))
-        } else {
-            startActivity(Intent(this, DisclaimerActivity::class.java))
+        // Order: onboarding (first launch only) -> disclaimer (until accepted) -> home
+        val next = when {
+            !onboardingDone -> OnboardingActivity::class.java
+            !disclaimerAccepted -> DisclaimerActivity::class.java
+            else -> MainActivity::class.java
         }
+        startActivity(Intent(this, next))
         finish()
     }
 }

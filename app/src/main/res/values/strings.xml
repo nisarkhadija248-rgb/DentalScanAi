@@ -31,6 +31,20 @@
     <!-- Scan Result -->
     <string name="scan_result">Scan Result</string>
 
+    <!-- ===================== Onboarding ===================== -->
+    <string name="onb_skip">Skip</string>
+    <string name="onb_prev">Previous</string>
+    <string name="onb_next">Next</string>
+    <string name="onb_get_started">Get Started</string>
+    <string name="onb_1_title">Welcome to DentalScan AI</string>
+    <string name="onb_1_text">Your personal dental health companion powered by artificial intelligence</string>
+    <string name="onb_2_title">Scan Your Teeth</string>
+    <string name="onb_2_text">Take up to 5 photos from different angles for comprehensive dental analysis</string>
+    <string name="onb_3_title">AI Powered Detection</string>
+    <string name="onb_3_text">Our YOLOv8 model detects Caries, Calculus and Gingivitis with 67% accuracy</string>
+    <string name="onb_4_title">Track Your Health</string>
+    <string name="onb_4_text">Monitor your dental health score over time and get personalized action plans</string>
+
     <!-- ===================== Quick wins: flashlight, voice, model info ===================== -->
     <string name="flash_on_desc">Turn flashlight off</string>
     <string name="flash_off_desc">Turn flashlight on</string>

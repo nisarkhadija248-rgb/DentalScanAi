@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- One onboarding slide: big illustration (icon on two teal discs), title, subtitle -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingHorizontal="32dp">
+
+    <FrameLayout
+        android:id="@+id/onboardingArt"
+        android:layout_width="230dp"
+        android:layout_height="230dp"
+        android:layout_marginBottom="36dp">
+
+        <View
+            android:layout_width="230dp"
+            android:layout_height="230dp"
+            android:background="@drawable/bg_circle_white"
+            android:backgroundTint="@color/tint_teal"/>
+
+        <View
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:layout_gravity="center"
+            android:background="@drawable/bg_circle_white"
+            android:backgroundTint="@color/primary"/>
+
+        <ImageView
+            android:id="@+id/onboardingIcon"
+            android:layout_width="84dp"
+            android:layout_height="84dp"
+            android:layout_gravity="center"
+            android:contentDescription="@null"
+            app:tint="@color/white"/>
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/onboardingTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textAppearance="@style/TextAppearance.App.Headline"/>
+
+    <TextView
+        android:id="@+id/onboardingSubtitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:gravity="center"
+        android:lineSpacingExtra="4dp"
+        android:textAppearance="@style/TextAppearance.App.Body"
+        android:textColor="@color/text_secondary"
+        android:textSize="16sp"/>
+
+</LinearLayout>

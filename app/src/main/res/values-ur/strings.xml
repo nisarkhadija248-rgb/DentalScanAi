@@ -18,6 +18,20 @@
     <string name="medium_confidence">درمیانی یقین</string>
     <string name="low_confidence">کم یقین</string>
 
+    <!-- ===================== آغاز کی رہنمائی ===================== -->
+    <string name="onb_skip">چھوڑیں</string>
+    <string name="onb_prev">پچھلا</string>
+    <string name="onb_next">اگلا</string>
+    <string name="onb_get_started">شروع کریں</string>
+    <string name="onb_1_title">DentalScan AI میں خوش آمدید</string>
+    <string name="onb_1_text">مصنوعی ذہانت سے چلنے والا آپ کا ذاتی دانتوں کی صحت کا ساتھی</string>
+    <string name="onb_2_title">اپنے دانتوں کا اسکین کریں</string>
+    <string name="onb_2_text">جامع تجزیے کے لیے مختلف زاویوں سے زیادہ سے زیادہ 5 تصاویر لیں</string>
+    <string name="onb_3_title">AI سے چلنے والی تشخیص</string>
+    <string name="onb_3_text">ہمارا YOLOv8 ماڈل کیریز، کیلکولس اور مسوڑوں کی سوزش کو 67% درستگی کے ساتھ پہچانتا ہے</string>
+    <string name="onb_4_title">اپنی صحت کا ریکارڈ رکھیں</string>
+    <string name="onb_4_text">وقت کے ساتھ اپنی دانتوں کی صحت کی نگرانی کریں اور ذاتی نوعیت کے ایکشن پلان حاصل کریں</string>
+
     <!-- ===================== فلیش لائٹ، آواز، ماڈل کی معلومات ===================== -->
     <string name="flash_on_desc">فلیش لائٹ بند کریں</string>
     <string name="flash_off_desc">فلیش لائٹ چلائیں</string>
