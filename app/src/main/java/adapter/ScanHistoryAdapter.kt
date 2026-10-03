@@ -13,6 +13,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.dentalscan.R
 import com.dentalscan.data.ScanEntity
+import org.json.JSONArray
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -62,7 +63,15 @@ class ScanHistoryAdapter(
 
         val context = holder.itemView.context
         val isUrdu = LanguageManager.isUrdu(context)
-        holder.conditionText.text = ConditionStyle.displayName(scan.condition, isUrdu)
+        // Every condition found in the scan ("Caries, Calculus"); a single one keeps its full name
+        val found = conditionsFound(scan)
+        holder.conditionText.text = if (found.size > 1) {
+            found.joinToString(if (isUrdu) "، " else ", ") {
+                if (isUrdu) ConditionStyle.displayName(it, true) else ConditionStyle.shortName(it)
+            }
+        } else {
+            ConditionStyle.displayName(scan.condition, isUrdu)
+        }
         holder.conditionStripe.setBackgroundColor(ConditionStyle.color(context, scan.condition))
         holder.dateText.text = dateFormat.format(scan.timestamp)
 
@@ -80,6 +89,28 @@ class ScanHistoryAdapter(
 
         holder.itemView.setOnClickListener {
             onItemClick(scan)
+        }
+    }
+
+    /**
+     * Distinct known conditions saved with the scan, highest confidence first. Reads the saved
+     * detections; anything unreadable gives an empty list (the row then shows the main condition).
+     */
+    private fun conditionsFound(scan: ScanEntity): List<String> {
+        if (scan.boundingBoxes.isBlank()) return emptyList()
+        return try {
+            val arr = JSONArray(scan.boundingBoxes)
+            (0 until arr.length())
+                .map { arr.getJSONObject(it) }
+                .mapNotNull { o ->
+                    ConditionStyle.of(o.optString("class"))?.let { it.shortName to o.optDouble("confidence", 0.0) }
+                }
+                .groupBy({ it.first }, { it.second })
+                .map { (name, confs) -> name to confs.max() }
+                .sortedByDescending { it.second }
+                .map { it.first }
+        } catch (e: Exception) {
+            emptyList()
         }
     }
 
