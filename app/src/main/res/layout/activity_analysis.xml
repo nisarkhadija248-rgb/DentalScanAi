@@ -6,6 +6,7 @@
     android:orientation="vertical">
 
     <ScrollView
+        android:id="@+id/resultScroll"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -156,6 +157,16 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="16dp">
+
+                    <!-- Several conditions found across the angles: "2 conditions detected" -->
+                    <TextView
+                        android:id="@+id/multiConditionsText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:textAppearance="@style/TextAppearance.App.Label"
+                        android:textColor="?attr/colorPrimary"
+                        android:visibility="gone"/>
 
                     <!-- Condition chip + severity chip -->
                     <LinearLayout
