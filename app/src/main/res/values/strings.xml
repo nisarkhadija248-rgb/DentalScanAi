@@ -31,6 +31,24 @@
     <!-- Scan Result -->
     <string name="scan_result">Scan Result</string>
 
+    <!-- ===================== Dental Health Score ===================== -->
+    <string name="health_score_title">Dental Health Score</string>
+    <string name="health_good">Good</string>
+    <string name="health_fair">Fair</string>
+    <string name="health_needs_attention">Needs Attention</string>
+    <string name="health_trend_month">%1$s this month</string>
+    <string name="health_trend_none">No change this month</string>
+    <string name="health_same">Your score stays at %1$d</string>
+    <string name="score_done">Done</string>
+    <plurals name="health_improved">
+        <item quantity="one">Your score improved by %1$d point!</item>
+        <item quantity="other">Your score improved by %1$d points!</item>
+    </plurals>
+    <plurals name="health_dropped">
+        <item quantity="one">Your score dropped by %1$d point</item>
+        <item quantity="other">Your score dropped by %1$d points</item>
+    </plurals>
+
     <!-- ===================== Onboarding ===================== -->
     <string name="onb_skip">Skip</string>
     <string name="onb_prev">Previous</string>

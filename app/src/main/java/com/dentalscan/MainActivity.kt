@@ -3,8 +3,14 @@ package com.dentalscan
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.content.res.ColorStateList
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import com.dentalscan.utils.HealthScore
 import com.dentalscan.utils.LanguageManager
 import com.dentalscan.utils.VoiceFeedback
 import com.dentalscan.utils.ProfileManager
@@ -122,6 +128,37 @@ class MainActivity : BaseActivity() {
     override fun onResume() {
         super.onResume()
         updateText() // Refresh text when returning from Settings
+        refreshHealthScoreBadge()
+    }
+
+    /** Small circle next to the profile name with the Dental Health Score (hidden before the first scan). */
+    private fun refreshHealthScoreBadge() {
+        val badge = findViewById<TextView>(R.id.healthScoreBadge)
+        lifecycleScope.launch {
+            val scans = HealthScore.scansFor(this@MainActivity)
+            val score = HealthScore.compute(scans)
+            if (score == null) {
+                badge.visibility = View.GONE
+                HealthScore.sync(this@MainActivity, null)
+                return@launch
+            }
+            HealthScore.sync(this@MainActivity, score)
+
+            val level = HealthScore.levelOf(score)
+            badge.text = score.toString()
+            badge.backgroundTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(this@MainActivity, level.colorRes))
+            // Dark text on the orange level, white on red and green
+            badge.setTextColor(
+                ContextCompat.getColor(
+                    this@MainActivity,
+                    if (level == HealthScore.Level.FAIR) R.color.color_on_yellow else R.color.white
+                )
+            )
+            badge.contentDescription =
+                "${getString(R.string.health_score_title)}: $score, ${getString(level.labelRes)}"
+            badge.visibility = View.VISIBLE
+        }
     }
 
     override fun onDestroy() {

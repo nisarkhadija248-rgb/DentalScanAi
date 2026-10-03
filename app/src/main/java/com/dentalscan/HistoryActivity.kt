@@ -15,6 +15,7 @@ import com.dentalscan.data.AppDatabase
 import android.graphics.Color
 import android.widget.LinearLayout
 import com.dentalscan.utils.ConditionStyle
+import com.dentalscan.utils.HealthScore
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
@@ -38,6 +39,7 @@ class HistoryActivity : BaseActivity() {
     private lateinit var statsChart: PieChart
     private lateinit var statsTitle: TextView
     private lateinit var statsLegend: LinearLayout
+    private lateinit var healthScoreCard: View
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +58,7 @@ class HistoryActivity : BaseActivity() {
         statsChart = findViewById(R.id.statsChart)
         statsTitle = findViewById(R.id.statsTitle)
         statsLegend = findViewById(R.id.statsLegend)
+        healthScoreCard = findViewById(R.id.healthScoreCard)
         btnStartScanEmpty.setOnClickListener {
             startActivity(Intent(this, CameraActivity::class.java))
         }
@@ -92,6 +95,8 @@ class HistoryActivity : BaseActivity() {
                 recyclerView.visibility = View.GONE
                 progressFeedbackText.visibility = View.GONE
                 statsCard.visibility = View.GONE
+                healthScoreCard.visibility = View.GONE
+                HealthScore.sync(this@HistoryActivity, null) // no scans: back to the starting 100
             } else {
                 emptyText.visibility = View.GONE
                 emptyState.visibility = View.GONE
@@ -116,7 +121,65 @@ class HistoryActivity : BaseActivity() {
                 recyclerView.adapter = adapter
                 showProgressFeedback(scans)
                 showStats(scans, isUrdu)
+                showHealthScore(scans)
             }
+        }
+    }
+
+    /** Prominent score card: arc gauge in the score's colour, label, and the change over the last 30 days. */
+    private suspend fun showHealthScore(scans: List<com.dentalscan.data.ScanEntity>) {
+        val score = HealthScore.compute(scans) ?: return
+        HealthScore.sync(this, score) // keep the saved profile copy equal to the real score
+
+        val level = HealthScore.levelOf(score)
+        val color = ContextCompat.getColor(this, level.colorRes)
+
+        findViewById<TextView>(R.id.healthScoreTitle).text = getString(R.string.health_score_title)
+        val label = findViewById<TextView>(R.id.healthScoreLabel)
+        label.text = getString(level.labelRes)
+        label.setTextColor(color)
+
+        val valueText = findViewById<TextView>(R.id.healthScoreValue)
+        val gauge = findViewById<com.google.android.material.progressindicator.CircularProgressIndicator>(R.id.healthGauge)
+        gauge.setIndicatorColor(color)
+
+        val trend = HealthScore.trend(scans)
+        val trendText = findViewById<TextView>(R.id.healthScoreTrend)
+        if (trend == 0) {
+            trendText.text = getString(R.string.health_trend_none)
+            trendText.setTextColor(ContextCompat.getColor(this, R.color.text_secondary))
+        } else {
+            val signed = if (trend > 0) "+$trend" else "$trend"
+            trendText.text = getString(R.string.health_trend_month, signed)
+            trendText.setTextColor(
+                ContextCompat.getColor(this, if (trend > 0) R.color.healthy_green else R.color.caries_red)
+            )
+        }
+
+        healthScoreCard.visibility = View.VISIBLE
+        val animate = try {
+            android.provider.Settings.Global.getFloat(
+                contentResolver, android.provider.Settings.Global.ANIMATOR_DURATION_SCALE, 1f
+            ) > 0f
+        } catch (e: Exception) {
+            true
+        }
+        if (animate) {
+            gauge.setProgressCompat(0, false)
+            valueText.text = "0"
+            android.animation.ValueAnimator.ofInt(0, score).apply {
+                duration = 900
+                interpolator = android.view.animation.DecelerateInterpolator()
+                addUpdateListener { a ->
+                    val v = a.animatedValue as Int
+                    gauge.setProgressCompat(v, false)
+                    valueText.text = v.toString()
+                }
+                start()
+            }
+        } else {
+            gauge.setProgressCompat(score, false)
+            valueText.text = score.toString()
         }
     }
 

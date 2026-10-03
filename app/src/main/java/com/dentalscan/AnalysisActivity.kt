@@ -26,6 +26,7 @@ import com.dentalscan.utils.ConditionStyle
 import com.dentalscan.utils.ActionPlanBuilder
 import com.dentalscan.utils.PhotoLoader
 import com.dentalscan.utils.AngleNames
+import com.dentalscan.utils.HealthScore
 import android.graphics.RectF
 import android.widget.ScrollView
 import java.io.File
@@ -1167,16 +1168,85 @@ class AnalysisActivity : BaseActivity() {
         )
 
         lifecycleScope.launch(Dispatchers.IO) {
-            AppDatabase.getDatabase(this@AnalysisActivity)
+            // Dental Health Score before this scan (null = the profile had no scans yet)
+            val earlierScans = HealthScore.scansFor(this@AnalysisActivity)
+            val previousScore = HealthScore.compute(earlierScans)
+
+            val newId = AppDatabase.getDatabase(this@AnalysisActivity)
                 .scanDao()
                 .insertScan(scan)
+
+            // Score after this scan, saved to the profile
+            val newScore = HealthScore.compute(earlierScans + scan.copy(id = newId)) ?: HealthScore.START
+            HealthScore.sync(this@AnalysisActivity, newScore)
 
             withContext(Dispatchers.Main) {
                 val msg = if (isUrdu) "ریکارڈ محفوظ ہو گیا" else "Scan saved successfully"
                 VoiceFeedback.speak(msg)
-                finish()
+                if (previousScore != null) {
+                    // The profile had earlier scans: show how this one changed the score, then "Done"
+                    showScoreUpdate(previousScore, newScore)
+                } else {
+                    finish()
+                }
             }
         }
+    }
+
+    /** Score card: old score, arrow up (green) / down (red), new score counting up or down, message. */
+    private fun showScoreUpdate(previous: Int, now: Int) {
+        val change = now - previous
+        val card = findViewById<View>(R.id.scoreCard)
+        val oldText = findViewById<TextView>(R.id.scoreOldText)
+        val newText = findViewById<TextView>(R.id.scoreNewText)
+        val arrow = findViewById<ImageView>(R.id.scoreArrow)
+        val message = findViewById<TextView>(R.id.scoreMessage)
+        findViewById<TextView>(R.id.scoreTitle).text = getString(R.string.health_score_title)
+
+        oldText.text = previous.toString()
+        newText.setTextColor(ContextCompat.getColor(this, HealthScore.levelOf(now).colorRes))
+
+        val changeColor = ContextCompat.getColor(
+            this,
+            when {
+                change > 0 -> R.color.healthy_green
+                change < 0 -> R.color.caries_red
+                else -> R.color.text_secondary
+            }
+        )
+        arrow.setImageResource(if (change < 0) R.drawable.ic_arrow_downward else R.drawable.ic_arrow_upward)
+        arrow.imageTintList = ColorStateList.valueOf(changeColor)
+        arrow.visibility = if (change == 0) View.INVISIBLE else View.VISIBLE
+
+        message.text = when {
+            change > 0 -> resources.getQuantityString(R.plurals.health_improved, change, change)
+            change < 0 -> resources.getQuantityString(R.plurals.health_dropped, -change, -change)
+            else -> getString(R.string.health_same, now)
+        }
+        message.setTextColor(changeColor)
+
+        // The number counts from the old score to the new one
+        if (animationsEnabled() && change != 0) {
+            newText.text = previous.toString()
+            ValueAnimator.ofInt(previous, now).apply {
+                duration = 900
+                interpolator = DecelerateInterpolator()
+                addUpdateListener { newText.text = (it.animatedValue as Int).toString() }
+                start()
+            }
+        } else {
+            newText.text = now.toString()
+        }
+
+        card.visibility = View.VISIBLE
+        playIn(card, 0L, dy = dp(24).toFloat())
+        resultScroll.post { resultScroll.smoothScrollTo(0, card.top) }
+
+        // Saving is finished: the button now just closes the screen
+        saveButton.text = getString(R.string.score_done)
+        saveButton.isEnabled = true
+        saveButton.setOnClickListener { finish() }
+        retakeButton.visibility = View.GONE
     }
 
     private fun detectionsToJson(hits: List<Hit>): String {

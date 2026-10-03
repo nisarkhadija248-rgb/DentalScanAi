@@ -18,6 +18,24 @@
     <string name="medium_confidence">درمیانی یقین</string>
     <string name="low_confidence">کم یقین</string>
 
+    <!-- ===================== دانتوں کی صحت کا اسکور ===================== -->
+    <string name="health_score_title">دانتوں کی صحت کا اسکور</string>
+    <string name="health_good">اچھا</string>
+    <string name="health_fair">معقول</string>
+    <string name="health_needs_attention">توجہ درکار ہے</string>
+    <string name="health_trend_month">%1$s اس مہینے</string>
+    <string name="health_trend_none">اس مہینے کوئی تبدیلی نہیں</string>
+    <string name="health_same">آپ کا اسکور %1$d پر برقرار ہے</string>
+    <string name="score_done">مکمل</string>
+    <plurals name="health_improved">
+        <item quantity="one">آپ کا اسکور %1$d پوائنٹ بہتر ہوا!</item>
+        <item quantity="other">آپ کا اسکور %1$d پوائنٹس بہتر ہوا!</item>
+    </plurals>
+    <plurals name="health_dropped">
+        <item quantity="one">آپ کا اسکور %1$d پوائنٹ کم ہوا</item>
+        <item quantity="other">آپ کا اسکور %1$d پوائنٹس کم ہوا</item>
+    </plurals>
+
     <!-- ===================== آغاز کی رہنمائی ===================== -->
     <string name="onb_skip">چھوڑیں</string>
     <string name="onb_prev">پچھلا</string>

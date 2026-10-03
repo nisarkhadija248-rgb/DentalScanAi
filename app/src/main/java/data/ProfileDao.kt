@@ -21,6 +21,9 @@ interface ProfileDao {
     @Query("SELECT * FROM profiles WHERE id = :profileId")
     suspend fun getProfileById(profileId: Long): ProfileEntity?
 
+    @Query("UPDATE profiles SET healthScore = :score WHERE id = :profileId")
+    suspend fun updateHealthScore(profileId: Long, score: Int)
+
     @Query("SELECT COUNT(*) FROM profiles")
     suspend fun getProfileCount(): Int
 }
