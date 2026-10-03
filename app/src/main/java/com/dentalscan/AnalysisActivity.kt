@@ -27,6 +27,7 @@ import com.dentalscan.utils.ActionPlanBuilder
 import com.dentalscan.utils.PhotoLoader
 import com.dentalscan.utils.AngleNames
 import com.dentalscan.utils.HealthScore
+import com.dentalscan.utils.ReminderScheduler
 import com.dentalscan.utils.RiskAssessment
 import android.graphics.RectF
 import android.widget.ScrollView
@@ -1183,6 +1184,8 @@ class AnalysisActivity : BaseActivity() {
             HealthScore.sync(this@AnalysisActivity, newScore)
             // Risk level from the last 5 scans (null below 3 scans)
             val risk = RiskAssessment.assess(scansNow)
+            // Smart reminders: work the frequency out again from this new result
+            ReminderScheduler.updateAfterScan(this@AnalysisActivity, scansNow)
 
             withContext(Dispatchers.Main) {
                 val msg = if (isUrdu) "ریکارڈ محفوظ ہو گیا" else "Scan saved successfully"

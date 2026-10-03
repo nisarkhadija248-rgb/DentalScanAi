@@ -322,31 +322,47 @@
                         android:id="@+id/frequencyGroup"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="horizontal">
+                        android:orientation="vertical">
 
                         <RadioButton
-                            android:id="@+id/radioDaily"
-                            android:layout_width="0dp"
+                            android:id="@+id/radioSmart"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
+                            android:text="Smart (Recommended)"/>
+
+                        <!-- Manual options -->
+                        <RadioButton
+                            android:id="@+id/radioDaily"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
                             android:text="Daily"/>
 
                         <RadioButton
                             android:id="@+id/radioEvery3Days"
-                            android:layout_width="0dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:text="3 Days"/>
 
                         <RadioButton
                             android:id="@+id/radioWeekly"
-                            android:layout_width="0dp"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
                             android:checked="true"
                             android:text="Weekly"/>
 
                     </RadioGroup>
+
+                    <!-- Smart mode: the frequency currently in use -->
+                    <TextView
+                        android:id="@+id/smartFrequencyText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:background="@drawable/bg_banner"
+                        android:backgroundTint="@color/tint_teal"
+                        android:padding="10dp"
+                        android:textAppearance="@style/TextAppearance.App.Body"
+                        android:visibility="gone"/>
 
                     <View
                         android:layout_width="match_parent"

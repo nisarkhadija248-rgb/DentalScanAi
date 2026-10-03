@@ -14,6 +14,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
 import com.dentalscan.data.AppDatabase
+import com.dentalscan.utils.HealthScore
 import com.dentalscan.utils.VoiceFeedback
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -37,6 +38,8 @@ class SettingsActivity : BaseActivity() {
     private lateinit var radioDaily: RadioButton
     private lateinit var radioEvery3Days: RadioButton
     private lateinit var radioWeekly: RadioButton
+    private lateinit var radioSmart: RadioButton
+    private lateinit var smartFrequencyText: TextView
 
     private var selectedHour: Int = 9
     private var selectedMinute: Int = 0
@@ -54,6 +57,8 @@ class SettingsActivity : BaseActivity() {
         radioDaily = findViewById(R.id.radioDaily)
         radioEvery3Days = findViewById(R.id.radioEvery3Days)
         radioWeekly = findViewById(R.id.radioWeekly)
+        radioSmart = findViewById(R.id.radioSmart)
+        smartFrequencyText = findViewById(R.id.smartFrequencyText)
         notificationSwitch = findViewById(R.id.notificationSwitch)
         languageSwitch = findViewById(R.id.languageSwitch)
         statusText = findViewById(R.id.statusText)
@@ -98,11 +103,42 @@ class SettingsActivity : BaseActivity() {
         themeSwitch.isChecked = isDarkMode
         updateThemeStatus(isDarkMode)
 
-        // Load frequency — must come after prefs is declared
+        // Frequency: Smart (follows the last scan) or one of the manual options
+        radioSmart.setText(R.string.smart_option)
+        radioDaily.setText(R.string.freq_daily)
+        radioEvery3Days.setText(R.string.freq_every_3_days)
+        radioWeekly.setText(R.string.freq_weekly)
+
         when (prefs.getInt("reminder_interval_days", 7)) {
             1 -> radioDaily.isChecked = true
             3 -> radioEvery3Days.isChecked = true
             else -> radioWeekly.isChecked = true
+        }
+        if (ReminderScheduler.mode(this) == ReminderScheduler.MODE_SMART) radioSmart.isChecked = true
+
+        frequencyGroup.setOnCheckedChangeListener { _, _ -> refreshSmartText() }
+        refreshSmartText()
+    }
+
+    /** With Smart selected, shows how often reminders currently come and why. */
+    private fun refreshSmartText() {
+        if (!radioSmart.isChecked) {
+            smartFrequencyText.visibility = android.view.View.GONE
+            return
+        }
+        smartFrequencyText.visibility = android.view.View.VISIBLE
+        lifecycleScope.launch {
+            val scans = try {
+                HealthScore.scansFor(this@SettingsActivity)
+            } catch (e: Exception) {
+                emptyList()
+            }
+            val hours = ReminderScheduler.smartHours(scans)
+            val label = getString(ReminderScheduler.labelRes(hours))
+            smartFrequencyText.text = getString(
+                if (scans.isEmpty()) R.string.smart_current_none else R.string.smart_current_based,
+                label
+            )
         }
     }
 
@@ -136,12 +172,15 @@ class SettingsActivity : BaseActivity() {
         val newDarkMode = themeSwitch.isChecked
         val notifEnabled = notificationSwitch.isChecked
 
+        val smart = frequencyGroup.checkedRadioButtonId == R.id.radioSmart
         val intervalDays = when (frequencyGroup.checkedRadioButtonId) {
             R.id.radioDaily -> 1
             R.id.radioEvery3Days -> 3
-            else -> 7
+            R.id.radioWeekly -> 7
+            else -> prefs.getInt("reminder_interval_days", 7) // Smart: keep the last manual choice
         }
 
+        editor.putString("reminder_mode", if (smart) ReminderScheduler.MODE_SMART else ReminderScheduler.MODE_MANUAL)
         editor.putBoolean("urdu_language", newUrduSetting)
         editor.putInt("notification_hour", selectedHour)
         editor.putInt("notification_minute", selectedMinute)
@@ -151,13 +190,30 @@ class SettingsActivity : BaseActivity() {
         editor.putInt("reminder_interval_days", intervalDays)
         editor.apply()
 
-        // Bug 2 fixed: only ONE scheduler call, with intervalDays passed correctly
-        if (notifEnabled) {
-            ReminderScheduler.scheduleDaily(this, selectedHour, selectedMinute, intervalDays)
-        } else {
+        if (!notifEnabled) {
             ReminderScheduler.cancel(this)
+            finishSaving(newUrduSetting, newDarkMode)
+        } else if (smart) {
+            // Smart: the interval comes from the last scan, so look that up before leaving this screen
+            lifecycleScope.launch {
+                val scans = try {
+                    HealthScore.scansFor(this@SettingsActivity)
+                } catch (e: Exception) {
+                    emptyList()
+                }
+                val hours = ReminderScheduler.smartHours(scans)
+                ReminderScheduler.saveSmartHours(this@SettingsActivity, hours)
+                ReminderScheduler.scheduleNext(this@SettingsActivity, selectedHour, selectedMinute, hours, afterScan = false)
+                finishSaving(newUrduSetting, newDarkMode)
+            }
+        } else {
+            ReminderScheduler.scheduleDaily(this, selectedHour, selectedMinute, intervalDays)
+            finishSaving(newUrduSetting, newDarkMode)
         }
+    }
 
+    /** Applies voice, language and theme, tells the user, and returns to the home screen. */
+    private fun finishSaving(newUrduSetting: Boolean, newDarkMode: Boolean) {
         VoiceFeedback.setEnabled(voiceSwitch.isChecked)
         VoiceFeedback.setLanguage(newUrduSetting)
         applyTheme(newDarkMode)

@@ -13,7 +13,12 @@ class BootReceiver : BroadcastReceiver() {
             val minute = prefs.getInt("notification_minute", 0)
             val enabled = prefs.getBoolean("notification_enabled", false)
             if (enabled) {
-                ReminderScheduler.scheduleDaily(context, hour, minute)
+                // Same frequency as before the restart (smart: the last smart interval; manual: the chosen one)
+                ReminderScheduler.scheduleNext(
+                    context, hour, minute,
+                    ReminderScheduler.currentHours(context),
+                    afterScan = false
+                )
             }
         }
     }

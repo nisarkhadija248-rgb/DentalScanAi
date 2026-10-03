@@ -44,11 +44,11 @@
         <activity android:name=".TipsActivity" android:exported="false"/>
 
         <receiver
-            android:name=".receiver.ReminderReceiver"
+            android:name=".ReminderReceiver"
             android:exported="false"/>
 
         <receiver
-            android:name=".receiver.BootReceiver"
+            android:name=".BootReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>

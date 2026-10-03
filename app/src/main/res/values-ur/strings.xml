@@ -18,6 +18,23 @@
     <string name="medium_confidence">درمیانی یقین</string>
     <string name="low_confidence">کم یقین</string>
 
+    <!-- ===================== اسمارٹ یاددہانی ===================== -->
+    <string name="smart_option">اسمارٹ (تجویز کردہ)</string>
+    <string name="freq_twice_daily">دن میں دو بار</string>
+    <string name="freq_daily">روزانہ</string>
+    <string name="freq_every_3_days">ہر 3 دن</string>
+    <string name="freq_weekly">ہفتہ وار</string>
+    <string name="freq_every_2_weeks">ہر 2 ہفتے</string>
+    <string name="smart_current_based">موجودہ ترتیب: %1$s (آخری اسکین کی بنیاد پر)</string>
+    <string name="smart_current_none">موجودہ ترتیب: %1$s (ابھی کوئی اسکین نہیں)</string>
+    <string name="reminder_title">DentalScan AI یاددہانی</string>
+    <string name="reminder_msg_first">اپنے پہلے اسکین سے دانتوں کی صحت کے سفر کا آغاز کریں!</string>
+    <string name="reminder_msg_healthy">شاباش! باقاعدہ دانتوں کے معائنے کا وقت ہو گیا</string>
+    <string name="reminder_msg_low">ہفتہ وار دانتوں کے اسکین کا وقت ہو گیا۔ اپنی دانتوں کی صحت کو درست راستے پر رکھیں۔</string>
+    <string name="reminder_msg_medium">جائزے کا وقت: دوبارہ اسکین کریں اور دیکھیں کہ آپ کی حالت میں کیا تبدیلی آئی۔</string>
+    <string name="reminder_msg_high">اہم: پائی گئی دانتوں کی بیماریوں کا فالو اپ کریں</string>
+    <string name="reminder_msg_critical">فوری: آپ کے حالیہ اسکینز میں خطرہ زیادہ ہے۔ دوبارہ اسکین کریں اور ڈینٹسٹ سے ملیں۔</string>
+
     <!-- ===================== خطرے کا جائزہ ===================== -->
     <string name="risk_title">خطرے کا جائزہ</string>
     <string name="risk_low">کم خطرہ</string>
