@@ -89,7 +89,7 @@ Purpose: Dental health awareness and education
 رن ٹائم: TensorFlow Lite (آلے پر)
 ان پٹ سائز: 640 × 640
 کلاسز: 3 (کیریز، کیلکولس، مسوڑوں کی سوزش)
-ڈیٹیکشن حد: 10% اعتماد، NMS IoU 0.45
+ڈیٹیکشن حد: 25% اعتماد، NMS IoU 0.45
 ماڈل کا سائز: تقریباً 3.2 MB
 پرائیویسی: تصاویر آپ کے آلے ہی پر رہتی ہیں
             """.trimIndent() else """
@@ -97,7 +97,7 @@ Architecture: YOLOv8n (nano object detector)
 Runtime: TensorFlow Lite, fully on-device
 Input size: 640 × 640
 Classes: 3 (Caries, Calculus, Gingivitis)
-Detection threshold: 10% confidence, NMS IoU 0.45
+Detection threshold: 25% confidence, NMS IoU 0.45
 Model size: about 3.2 MB
 Privacy: images never leave your device
             """.trimIndent()

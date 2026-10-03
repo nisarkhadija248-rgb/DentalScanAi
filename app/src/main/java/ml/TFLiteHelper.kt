@@ -15,7 +15,8 @@ class TFLiteHelper(private val context: Context) {
         private const val MODEL_FILE = "dental_model.tflite"
         private const val INPUT_SIZE = 640
         private const val NUM_CLASSES = 3
-        private const val CONF_THRESHOLD = 0.10f
+        // Detections below this confidence are dropped (raised from 0.10 to cut false positives)
+        private const val CONF_THRESHOLD = 0.25f
         private const val IOU_THRESHOLD = 0.45f
         private val CLASS_NAMES = arrayOf("Calculus", "Caries", "Gingivitis")
     }

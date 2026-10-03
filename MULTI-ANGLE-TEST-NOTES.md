@@ -32,7 +32,7 @@ Last safe commit before this work: `796fed5` (git can return to it).
    - Tapping each condition row switches to the photo it was found in and shows its box.
 4. **Same condition in several angles:** only the highest-confidence one appears in the list.
 5. **Healthy in every angle:** green healthy card, no conditions section, Save hidden.
-6. **False positives:** the threshold is low (10%). Check whether weak photos (upper/lower/side) add wrong conditions. If so, tell me; raising the threshold for angles 2 to 5 would be a separate decision.
+6. **False positives:** the threshold is 25% (it was 10% earlier). Check whether weak photos (upper/lower/side) add wrong conditions. If so, tell me; raising the threshold for angles 2 to 5 would be a separate decision.
 7. Save, then check History shows e.g. "Caries, Calculus" and that Comparison still works (it uses the worst condition).
 8. Reopen the saved scan: thumbnails switch with their own boxes, and the Action Plan matches what you saw before saving, including any ticks.
 
