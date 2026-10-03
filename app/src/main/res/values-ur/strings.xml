@@ -18,6 +18,19 @@
     <string name="medium_confidence">درمیانی یقین</string>
     <string name="low_confidence">کم یقین</string>
 
+    <!-- ===================== ملٹی اینگل تجزیہ ===================== -->
+    <string name="angle_front">سامنے کا منظر</string>
+    <string name="angle_upper">اوپر کے دانت</string>
+    <string name="angle_lower">نیچے کے دانت</string>
+    <string name="angle_left">بائیں طرف</string>
+    <string name="angle_right">دائیں طرف</string>
+    <string name="angle_photo_n">تصویر %1$d</string>
+    <string name="analysing_angle">زاویہ %1$d از %2$d کا تجزیہ جاری ہے…</string>
+    <string name="found_in">پایا گیا: %1$s</string>
+    <string name="conditions_found">پائی گئی بیماریاں (%1$d)</string>
+    <string name="conditions_detected_summary">%1$d بیماریاں پائی گئیں</string>
+    <string name="photos_captured">لی گئی تصاویر (%1$d)</string>
+
     <!-- ===================== ایکشن پلان ===================== -->
 
     <!-- Header by urgency -->

@@ -211,7 +211,8 @@ class CameraActivity : BaseActivity() {
             val dot = capturedDotsText.getChildAt(i - 1) ?: continue
             dot.setBackgroundResource(
                 when {
-                    i < currentStep && capturedPaths.size >= i -> R.drawable.dot_done
+                    // done = this step has a photo (skipped steps are stored as "")
+                    i < currentStep && capturedPaths.getOrNull(i - 1)?.isNotEmpty() == true -> R.drawable.dot_done
                     i == currentStep -> R.drawable.dot_current
                     else -> R.drawable.dot_todo
                 }
@@ -246,10 +247,9 @@ class CameraActivity : BaseActivity() {
      * Handles all 6 scenarios described in planning.
      */
     private fun advanceToNextStep(savedPath: String?) {
-        // Add path only if capture was successful
-        if (savedPath != null) {
-            capturedPaths.add(savedPath)
-        }
+        // One entry per step, so the position in the list always equals the step number
+        // (0 = front, 1 = upper, 2 = lower, 3 = left, 4 = right). A skipped step is stored as "".
+        capturedPaths.add(savedPath ?: "")
 
         if (currentStep >= totalSteps) {
             // All steps done — launch analysis
@@ -268,7 +268,7 @@ class CameraActivity : BaseActivity() {
     }
 
     private fun launchAnalysis() {
-        if (capturedPaths.isEmpty()) {
+        if (capturedPaths.none { it.isNotEmpty() }) {
             // Edge case: user skipped every step including step 1
             // This shouldn't happen since step 1 can't be skipped,
             // but handle it gracefully anyway

@@ -31,6 +31,19 @@
     <!-- Scan Result -->
     <string name="scan_result">Scan Result</string>
 
+    <!-- ===================== Multi-angle analysis ===================== -->
+    <string name="angle_front">Front View</string>
+    <string name="angle_upper">Upper Teeth</string>
+    <string name="angle_lower">Lower Teeth</string>
+    <string name="angle_left">Left Side</string>
+    <string name="angle_right">Right Side</string>
+    <string name="angle_photo_n">Photo %1$d</string>
+    <string name="analysing_angle">Analysing angle %1$d of %2$d…</string>
+    <string name="found_in">Found in: %1$s</string>
+    <string name="conditions_found">Conditions found (%1$d)</string>
+    <string name="conditions_detected_summary">%1$d conditions detected</string>
+    <string name="photos_captured">Captured photos (%1$d)</string>
+
     <!-- ===================== Action Plan ===================== -->
 
     <!-- Header by urgency -->
