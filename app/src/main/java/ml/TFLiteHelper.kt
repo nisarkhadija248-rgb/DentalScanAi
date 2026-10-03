@@ -11,7 +11,7 @@ import java.nio.channels.FileChannel
 class TFLiteHelper(private val context: Context) {
 
     companion object {
-        const val DUMMY_MODE = true
+        const val DUMMY_MODE = false
         private const val MODEL_FILE = "dental_model.tflite"
         private const val INPUT_SIZE = 640
         private const val NUM_CLASSES = 3
@@ -22,10 +22,17 @@ class TFLiteHelper(private val context: Context) {
 
     private var interpreter: Interpreter? = null
 
+    // True when the model's input is [1, 3, H, W] instead of [1, H, W, 3]
+    private var channelsFirst = false
+
     init {
         if (!DUMMY_MODE) {
             val options = Interpreter.Options().apply { numThreads = 4 }
-            interpreter = Interpreter(loadModelFile(), options)
+            val model = Interpreter(loadModelFile(), options)
+            interpreter = model
+
+            val shape = model.getInputTensor(0).shape()
+            channelsFirst = shape.size == 4 && shape[1] == 3 && shape[3] != 3
         }
     }
 
@@ -42,16 +49,28 @@ class TFLiteHelper(private val context: Context) {
             return listOf(Detection(0, "Caries", 0.85f, RectF(0.3f, 0.3f, 0.7f, 0.7f)))
         }
 
+        // inputArray is height x width x 3, interleaved R,G,B
         val inputArray = ImagePreprocessor.preprocess(image)
-        val reshapedInput = Array(1) {
-            Array(INPUT_SIZE) { Array(INPUT_SIZE) { FloatArray(3) } }
-        }
 
-        var idx = 0
-        for (y in 0 until INPUT_SIZE)
-            for (x in 0 until INPUT_SIZE)
-                for (c in 0..2)
-                    reshapedInput[0][y][x][c] = inputArray[idx++]
+        // Models are exported either channels-last [1,640,640,3] or channels-first [1,3,640,640].
+        // Read which one this model wants from its input shape, so both kinds work.
+        val reshapedInput: Any = if (channelsFirst) {
+            val chw = Array(1) { Array(3) { Array(INPUT_SIZE) { FloatArray(INPUT_SIZE) } } }
+            var idx = 0
+            for (y in 0 until INPUT_SIZE)
+                for (x in 0 until INPUT_SIZE)
+                    for (c in 0..2)
+                        chw[0][c][y][x] = inputArray[idx++]
+            chw
+        } else {
+            val hwc = Array(1) { Array(INPUT_SIZE) { Array(INPUT_SIZE) { FloatArray(3) } } }
+            var idx = 0
+            for (y in 0 until INPUT_SIZE)
+                for (x in 0 until INPUT_SIZE)
+                    for (c in 0..2)
+                        hwc[0][y][x][c] = inputArray[idx++]
+            hwc
+        }
 
         val output = Array(1) { Array(4 + NUM_CLASSES) { FloatArray(8400) } }
         interpreter?.run(reshapedInput, output)
