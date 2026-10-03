@@ -9,3 +9,5 @@ local.properties
 captures/
 .externalNativeBuild/
 .cxx/
+# Model is large (about 44 MB): kept out of git, copied manually into assets
+app/src/main/assets/dental_model.tflite
