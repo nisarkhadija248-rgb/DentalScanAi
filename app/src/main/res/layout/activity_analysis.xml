@@ -53,6 +53,21 @@
 
                     </FrameLayout>
 
+                    <!-- Voice mute / unmute -->
+                    <ImageView
+                        android:id="@+id/resultMuteButton"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:layout_gravity="top|end"
+                        android:layout_margin="10dp"
+                        android:background="@drawable/bg_circle_white"
+                        android:backgroundTint="#66000000"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_volume_up"
+                        app:tint="@android:color/white"/>
+
                 </FrameLayout>
 
             </com.google.android.material.card.MaterialCardView>

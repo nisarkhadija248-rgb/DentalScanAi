@@ -31,6 +31,34 @@
     <!-- Scan Result -->
     <string name="scan_result">Scan Result</string>
 
+    <!-- ===================== Quick wins: flashlight, voice, model info ===================== -->
+    <string name="flash_on_desc">Turn flashlight off</string>
+    <string name="flash_off_desc">Turn flashlight on</string>
+    <string name="voice_mute_desc">Mute voice</string>
+    <string name="voice_unmute_desc">Unmute voice</string>
+    <string name="voice_status_on">Voice is on</string>
+    <string name="voice_status_muted">Voice is muted</string>
+
+    <string name="ai_model_details">AI Model Details</string>
+    <string name="model_label_model">Model</string>
+    <string name="model_label_dataset">Dataset</string>
+    <string name="model_label_classes">Classes</string>
+    <string name="model_label_accuracy">Accuracy (mAP50)</string>
+    <string name="model_label_input">Input size</string>
+    <string name="model_label_format">Format</string>
+    <string name="model_label_training">Training</string>
+    <string name="model_value_model">YOLOv8s</string>
+    <string name="model_value_dataset">6,000+ images</string>
+    <string name="model_value_classes">Calculus, Caries, Gingivitis</string>
+    <string name="model_value_accuracy">67%</string>
+    <string name="model_value_input">640x640</string>
+    <string name="model_value_format">TFLite</string>
+    <string name="model_value_training">Google Colab T4 GPU</string>
+    <string name="model_footnote">Runs fully on your phone. Images never leave your device.</string>
+
+    <string name="healthy_label">Healthy</string>
+    <string name="healthy_row_note">No issues detected</string>
+
     <!-- ===================== Multi-angle analysis ===================== -->
     <string name="angle_front">Front View</string>
     <string name="angle_upper">Upper Teeth</string>

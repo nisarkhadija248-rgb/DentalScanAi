@@ -1,6 +1,8 @@
 package com.dentalscan.utils
 
 import android.content.Context
+import android.widget.ImageView
+import com.dentalscan.R
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import java.util.*
@@ -23,6 +25,32 @@ object VoiceFeedback {
         if (!value) {
             pendingMessages.clear()
             tts?.stop()
+        }
+    }
+
+    /** Saved on/off state (also what the Settings switch shows). Default: on. */
+    fun isEnabled(context: Context): Boolean =
+        context.getSharedPreferences("settings", Context.MODE_PRIVATE).getBoolean("voice_enabled", true)
+
+    /**
+     * Gives a small mute / unmute icon button its icon, description and click behaviour.
+     * Muting is global and saved, so it persists and shows in Settings.
+     */
+    fun attachMuteButton(button: ImageView) {
+        val context = button.context
+        fun refresh() {
+            val on = isEnabled(context)
+            button.setImageResource(if (on) R.drawable.ic_volume_up else R.drawable.ic_volume_off)
+            button.contentDescription =
+                context.getString(if (on) R.string.voice_mute_desc else R.string.voice_unmute_desc)
+        }
+        refresh()
+        button.setOnClickListener {
+            val nowOn = !isEnabled(context)
+            context.getSharedPreferences("settings", Context.MODE_PRIVATE)
+                .edit().putBoolean("voice_enabled", nowOn).apply()
+            setEnabled(nowOn)   // muting also stops anything being spoken right now
+            refresh()
         }
     }
 

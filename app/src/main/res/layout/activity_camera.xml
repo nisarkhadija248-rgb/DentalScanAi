@@ -108,6 +108,35 @@
 
                 </LinearLayout>
 
+                <!-- Voice mute / unmute -->
+                <ImageView
+                    android:id="@+id/cameraMuteButton"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="10dp"
+                    android:background="@drawable/bg_circle_white"
+                    android:backgroundTint="#33FFFFFF"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_volume_up"
+                    app:tint="@android:color/white"/>
+
+                <!-- Flashlight (rear camera torch) -->
+                <ImageView
+                    android:id="@+id/flashButton"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_circle_white"
+                    android:backgroundTint="#33FFFFFF"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:padding="8dp"
+                    android:src="@drawable/ic_flashlight_off"
+                    android:visibility="gone"
+                    app:tint="@android:color/white"/>
+
             </LinearLayout>
 
             <!-- Progress bar -->

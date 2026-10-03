@@ -252,13 +252,15 @@ class ComparisonActivity : BaseActivity() {
 
         val entries = scans.mapIndexed { index, scan ->
             Entry(
-                index.toFloat(), when (scan.severity) {
-                    "High" -> 3f
-                    "Medium" -> 2f
+                index.toFloat(), when {
+                    ConditionStyle.isHealthy(scan.condition) -> 0f   // healthy scans sit at the bottom
+                    scan.severity == "High" -> 3f
+                    scan.severity == "Medium" -> 2f
                     else -> 1f
                 }
             )
         }
+        val hasHealthy = scans.any { ConditionStyle.isHealthy(it.condition) }
 
         val primary = ContextCompat.getColor(this, R.color.primary)
         val axisText = ContextCompat.getColor(this, R.color.text_secondary)
@@ -289,7 +291,7 @@ class ComparisonActivity : BaseActivity() {
         chart.axisLeft.apply {
             textColor = axisText
             textSize = 11f
-            axisMinimum = 0.5f
+            axisMinimum = if (hasHealthy) -0.5f else 0.5f   // room for the "Healthy" level only when needed
             axisMaximum = 3.5f
             granularity = 1f
             isGranularityEnabled = true
@@ -300,6 +302,7 @@ class ComparisonActivity : BaseActivity() {
                     val level = value.roundToInt()
                     if (abs(value - level) > 0.01f) return ""
                     return when (level) {
+                        0 -> if (isUrdu) "صحت مند" else "Healthy"
                         1 -> if (isUrdu) "کم" else "Low"
                         2 -> if (isUrdu) "درمیانی" else "Medium"
                         3 -> if (isUrdu) "زیادہ" else "High"

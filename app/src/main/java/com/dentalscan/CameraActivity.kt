@@ -42,6 +42,8 @@ class CameraActivity : BaseActivity() {
     private lateinit var stepProgressBar: ProgressBar
     private lateinit var capturedDotsText: LinearLayout
     private lateinit var guideFrame: View
+    private lateinit var flashButton: ImageView
+    private lateinit var cameraMuteButton: ImageView
 
     // ── Camera ─────────────────────────────────────────
     private var imageCapture: ImageCapture? = null
@@ -151,6 +153,38 @@ class CameraActivity : BaseActivity() {
         stepProgressBar = findViewById(R.id.stepProgressBar)
         capturedDotsText = findViewById(R.id.capturedDotsText)
         guideFrame = findViewById(R.id.guideFrame)
+        flashButton = findViewById(R.id.flashButton)
+        cameraMuteButton = findViewById(R.id.cameraMuteButton)
+
+        VoiceFeedback.attachMuteButton(cameraMuteButton)
+        flashButton.setOnClickListener {
+            // The icon follows the real torch state (see observeTorch), so a failure can't leave it wrong
+            val cam = camera ?: return@setOnClickListener
+            val turnOn = cam.cameraInfo.torchState.value != TorchState.ON
+            cam.cameraControl.enableTorch(turnOn)
+        }
+    }
+
+    private fun showTorchIcon(on: Boolean) {
+        flashButton.setImageResource(if (on) R.drawable.ic_flashlight_on else R.drawable.ic_flashlight_off)
+        flashButton.contentDescription =
+            getString(if (on) R.string.flash_on_desc else R.string.flash_off_desc)
+    }
+
+    /** Show the flashlight button only if the rear camera has a flash, and keep its icon in sync. */
+    private fun observeTorch(cam: Camera) {
+        if (!cam.cameraInfo.hasFlashUnit()) {
+            flashButton.visibility = View.GONE
+            return
+        }
+        flashButton.visibility = View.VISIBLE
+        cam.cameraInfo.torchState.observe(this) { state -> showTorchIcon(state == TorchState.ON) }
+    }
+
+    /** The torch is always switched off when the user leaves the camera screen. */
+    override fun onPause() {
+        camera?.cameraControl?.enableTorch(false)
+        super.onPause()
     }
 
     // ── Wizard Logic ───────────────────────────────────
@@ -325,6 +359,7 @@ class CameraActivity : BaseActivity() {
                     this, CameraSelector.DEFAULT_BACK_CAMERA,
                     preview, imageCapture, imageAnalyzer
                 )
+                camera?.let { observeTorch(it) }
             } catch (exc: Exception) {
                 Toast.makeText(this, "Camera failed", Toast.LENGTH_SHORT).show()
             }

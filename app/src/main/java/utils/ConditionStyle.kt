@@ -67,7 +67,15 @@ object ConditionStyle {
         else -> null
     }
 
+    /**
+     * A scan saved with no conditions found is stored with condition "Healthy" (confidence 0,
+     * severity "None"). It is deliberately NOT one of the three conditions in [of], so the
+     * Action Plan, charts and condition lists never treat it as a disease.
+     */
+    fun isHealthy(raw: String?): Boolean = raw?.trim().equals("healthy", ignoreCase = true)
+
     fun displayName(raw: String?, isUrdu: Boolean): String {
+        if (isHealthy(raw)) return if (isUrdu) "صحت مند" else "Healthy"
         val style = of(raw)
         return when {
             style != null -> if (isUrdu) style.displayNameUr else style.displayName
@@ -77,17 +85,24 @@ object ConditionStyle {
     }
 
     fun shortName(raw: String?): String =
-        of(raw)?.shortName ?: (raw ?: "").replaceFirstChar { it.uppercase() }
+        if (isHealthy(raw)) "Healthy"
+        else of(raw)?.shortName ?: (raw ?: "").replaceFirstChar { it.uppercase() }
 
-    /** Theme-aware condition color (falls back to the primary color for unknown labels). */
+    /** Theme-aware condition color (green for Healthy, primary color for unknown labels). */
     @ColorInt
     fun color(context: Context, raw: String?): Int =
-        ContextCompat.getColor(context, of(raw)?.colorRes ?: R.color.primary)
+        ContextCompat.getColor(
+            context,
+            if (isHealthy(raw)) R.color.healthy_green else of(raw)?.colorRes ?: R.color.primary
+        )
 
     /** Theme-aware light tint used for chip / card backgrounds. */
     @ColorInt
     fun tint(context: Context, raw: String?): Int =
-        ContextCompat.getColor(context, of(raw)?.tintRes ?: R.color.surface_variant)
+        ContextCompat.getColor(
+            context,
+            if (isHealthy(raw)) R.color.healthy_bg else of(raw)?.tintRes ?: R.color.surface_variant
+        )
 
     /** Fixed ARGB for canvas drawing. */
     @ColorInt
@@ -103,6 +118,7 @@ object ConditionStyle {
                 "High" -> "زیادہ"
                 "Medium" -> "درمیانی"
                 "Low" -> "کم"
+                "None" -> "کوئی نہیں"
                 else -> severity
             }
         } else {

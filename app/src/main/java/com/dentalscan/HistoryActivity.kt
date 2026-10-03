@@ -122,9 +122,12 @@ class HistoryActivity : BaseActivity() {
 
     /** Donut chart and counts of saved scans per condition (display only). */
     private fun showStats(scans: List<com.dentalscan.data.ScanEntity>, isUrdu: Boolean) {
-        val order = listOf("Caries", "Calculus", "Gingivitis")
+        val order = listOf("Caries", "Calculus", "Gingivitis", "Healthy")
         val counts = order.map { name ->
-            name to scans.count { ConditionStyle.of(it.condition)?.shortName == name }
+            name to scans.count {
+                if (name == "Healthy") ConditionStyle.isHealthy(it.condition)
+                else ConditionStyle.of(it.condition)?.shortName == name
+            }
         }.filter { it.second > 0 }
 
         if (counts.isEmpty()) {

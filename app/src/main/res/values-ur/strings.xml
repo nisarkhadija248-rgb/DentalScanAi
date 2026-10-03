@@ -18,6 +18,34 @@
     <string name="medium_confidence">درمیانی یقین</string>
     <string name="low_confidence">کم یقین</string>
 
+    <!-- ===================== فلیش لائٹ، آواز، ماڈل کی معلومات ===================== -->
+    <string name="flash_on_desc">فلیش لائٹ بند کریں</string>
+    <string name="flash_off_desc">فلیش لائٹ چلائیں</string>
+    <string name="voice_mute_desc">آواز بند کریں</string>
+    <string name="voice_unmute_desc">آواز چلائیں</string>
+    <string name="voice_status_on">آواز چالو ہے</string>
+    <string name="voice_status_muted">آواز بند ہے</string>
+
+    <string name="ai_model_details">AI ماڈل کی تفصیلات</string>
+    <string name="model_label_model">ماڈل</string>
+    <string name="model_label_dataset">ڈیٹا سیٹ</string>
+    <string name="model_label_classes">کلاسز</string>
+    <string name="model_label_accuracy">درستگی (mAP50)</string>
+    <string name="model_label_input">ان پٹ سائز</string>
+    <string name="model_label_format">فارمیٹ</string>
+    <string name="model_label_training">تربیت</string>
+    <string name="model_value_model">YOLOv8s</string>
+    <string name="model_value_dataset">6,000+ تصاویر</string>
+    <string name="model_value_classes">کیلکولس، کیریز، مسوڑوں کی سوزش</string>
+    <string name="model_value_accuracy">67%</string>
+    <string name="model_value_input">640x640</string>
+    <string name="model_value_format">TFLite</string>
+    <string name="model_value_training">گوگل کولیب T4 GPU</string>
+    <string name="model_footnote">مکمل طور پر آپ کے فون پر چلتا ہے۔ تصاویر آپ کے آلے سے باہر نہیں جاتیں۔</string>
+
+    <string name="healthy_label">صحت مند</string>
+    <string name="healthy_row_note">کوئی مسئلہ نہیں ملا</string>
+
     <!-- ===================== ملٹی اینگل تجزیہ ===================== -->
     <string name="angle_front">سامنے کا منظر</string>
     <string name="angle_upper">اوپر کے دانت</string>

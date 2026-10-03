@@ -210,6 +210,7 @@ class AnalysisActivity : BaseActivity() {
 
         saveButton.setOnClickListener { saveScan() }
         retakeButton.setOnClickListener { finish() }
+        VoiceFeedback.attachMuteButton(findViewById(R.id.resultMuteButton))
 
         val isViewOnly = intent.getBooleanExtra("view_only", false)
         isViewOnlyMode = isViewOnly
@@ -230,6 +231,14 @@ class AnalysisActivity : BaseActivity() {
             val tempScan = com.dentalscan.data.ScanEntity(imagePath = imagePath)
             val bitmap = BitmapFactory.decodeFile(tempScan.getThumbnailPath())
             imageView.setImageBitmap(bitmap) // shown at once, replaced by the annotated photo below
+
+            // A saved healthy scan: green healthy card, no conditions, no Action Plan
+            if (ConditionStyle.isHealthy(condition)) {
+                angleSwitchEnabled = true
+                showHealthyState(isUrdu)
+                selectAngle(selectedAngle)
+                return
+            }
 
             // Rebuild what was found (and in which angle) from the saved scan.
             // Scans saved before multi-angle analysis have no angle: everything counts as angle 0.
@@ -266,6 +275,8 @@ class AnalysisActivity : BaseActivity() {
             }
 
         } else {
+            // Save is only possible once the result is in (otherwise an empty result would look healthy)
+            saveButton.isEnabled = false
             startScanAnimation()
             analyzeImage()
         }
@@ -348,6 +359,7 @@ class AnalysisActivity : BaseActivity() {
                     updateThumbSelection()
                     imageView.setImageBitmap(annotated[selectedAngle])
                     angleSwitchEnabled = true
+                    saveButton.isEnabled = true
 
                     displayResults(primaryDetection)
                 }
@@ -364,6 +376,15 @@ class AnalysisActivity : BaseActivity() {
         }
     }
 
+    /** Green "no issues" card; no conditions list, Action Plan or tips. */
+    private fun showHealthyState(isUrdu: Boolean) {
+        resultText.text = if (isUrdu) "کوئی مسئلہ نہیں ملا" else "No dental issues detected"
+        confidenceText.text = if (isUrdu) "آپ کے دانت صحت مند ہیں" else "Your teeth appear healthy"
+        showHealthyUi()
+        multiConditionsText.visibility = View.GONE
+        findingsCard.visibility = View.GONE
+    }
+
     /**
      * One hit per condition: the highest-confidence detection of that condition across all angles
      * (the lowest angle wins a tie), sorted worst (highest confidence) first.
@@ -378,13 +399,8 @@ class AnalysisActivity : BaseActivity() {
         val isUrdu = LanguageManager.isUrdu(this)
 
         if (detection == null) {
-            resultText.text = if (isUrdu) "کوئی مسئلہ نہیں ملا" else "No dental issues detected"
-            confidenceText.text = if (isUrdu) "آپ کے دانت صحت مند ہیں" else "Your teeth appear healthy"
-            showHealthyUi()
-            multiConditionsText.visibility = View.GONE
-            findingsCard.visibility = View.GONE
-            // Nothing to save when nothing was detected, so don't offer a Save button that does nothing
-            saveButton.visibility = View.GONE
+            showHealthyState(isUrdu)
+            // A healthy result can be saved too (stored as condition "Healthy")
             VoiceFeedback.speak(if (isUrdu) "کوئی مسئلہ نہیں ملا" else "No dental issues detected")
             return
         }
@@ -1121,7 +1137,12 @@ class AnalysisActivity : BaseActivity() {
     }
 
     private fun saveScan() {
-        val detection = currentDetections.maxByOrNull { it.confidence } ?: return
+        // Wait for the analysis; an empty result before that would be saved as "Healthy" by mistake
+        if (!angleSwitchEnabled || !saveButton.isEnabled) return
+        saveButton.isEnabled = false // no double saves
+
+        // null = nothing detected in any angle: saved as a healthy scan
+        val detection = currentDetections.maxByOrNull { it.confidence }
         val isUrdu = LanguageManager.isUrdu(this)
 
         // imagePath is already a JSON array from the wizard — save it as-is
@@ -1136,9 +1157,9 @@ class AnalysisActivity : BaseActivity() {
             userId = getCurrentUserId(),
             userName = getCurrentUserName(),
             imagePath = imagePathJson,
-            condition = detection.className,
-            confidence = detection.confidence,
-            severity = ImageUtils.getSeverityText(detection.confidence),
+            condition = detection?.className ?: "Healthy",
+            confidence = detection?.confidence ?: 0f,
+            severity = if (detection != null) ImageUtils.getSeverityText(detection.confidence) else "None",
             // Main condition above is the worst one (History/Comparison use it). Every detection
             // from every angle is stored here, each with its angle, to rebuild the view later.
             boundingBoxes = detectionsToJson(allHits),

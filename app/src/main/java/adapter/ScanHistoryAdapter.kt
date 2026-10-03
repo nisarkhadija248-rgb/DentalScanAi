@@ -31,6 +31,7 @@ class ScanHistoryAdapter(
         val severityText: TextView = view.findViewById(R.id.severityText)
         val conditionStripe: View = view.findViewById(R.id.conditionStripe)
         val photoCountText: TextView = view.findViewById(R.id.photoCountText)
+        val defaultConditionColors: ColorStateList = conditionText.textColors
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -84,8 +85,37 @@ class ScanHistoryAdapter(
             holder.photoCountText.visibility = View.GONE
         }
 
-        holder.severityText.text =
+        val healthy = ConditionStyle.isHealthy(scan.condition)
+        holder.severityText.text = if (healthy) {
+            context.getString(R.string.healthy_row_note)
+        } else {
             "${(scan.confidence * 100).toInt()}% · ${ConditionStyle.severityLabel(scan.severity, isUrdu)}"
+        }
+
+        // Healthy scans: green badge with a check instead of a condition-coloured title.
+        // (Rows are recycled, so every other row is explicitly reset.)
+        val density = context.resources.displayMetrics.density
+        if (healthy) {
+            val green = ContextCompat.getColor(context, R.color.healthy_green)
+            holder.conditionText.setTextColor(green)
+            holder.conditionText.setBackgroundResource(R.drawable.bg_badge)
+            holder.conditionText.backgroundTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(context, R.color.healthy_bg))
+            holder.conditionText.setPadding(
+                (8 * density).toInt(), (3 * density).toInt(), (10 * density).toInt(), (3 * density).toInt()
+            )
+            val check = ContextCompat.getDrawable(context, R.drawable.ic_check_circle)?.mutate()
+            check?.setBounds(0, 0, (16 * density).toInt(), (16 * density).toInt())
+            check?.setTint(green)
+            holder.conditionText.compoundDrawablePadding = (6 * density).toInt()
+            holder.conditionText.setCompoundDrawablesRelative(check, null, null, null)
+        } else {
+            holder.conditionText.setTextColor(holder.defaultConditionColors)
+            holder.conditionText.background = null
+            holder.conditionText.backgroundTintList = null
+            holder.conditionText.setPadding(0, 0, 0, 0)
+            holder.conditionText.setCompoundDrawablesRelative(null, null, null, null)
+        }
 
         holder.itemView.setOnClickListener {
             onItemClick(scan)

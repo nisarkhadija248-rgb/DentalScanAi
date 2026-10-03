@@ -84,6 +84,12 @@ class SettingsActivity : BaseActivity() {
         notificationSwitch.isChecked = notifEnabled
 
         voiceSwitch.isChecked = prefs.getBoolean("voice_enabled", true)
+        val voiceStatus = findViewById<TextView>(R.id.voiceStatusText)
+        fun showVoiceStatus(on: Boolean) {
+            voiceStatus.text = getString(if (on) R.string.voice_status_on else R.string.voice_status_muted)
+        }
+        showVoiceStatus(voiceSwitch.isChecked)
+        voiceSwitch.setOnCheckedChangeListener { _, checked -> showVoiceStatus(checked) }
         voiceTitle.text = if (isUrdu) "آواز کی رہنمائی" else "Voice Feedback"
         voiceDescription.text =
             if (isUrdu) "ہدایات اور نتائج بول کر سنائیں" else "Speak instructions and results aloud"

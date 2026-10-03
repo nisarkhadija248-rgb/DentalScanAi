@@ -264,6 +264,14 @@
                             android:checked="true"/>
                     </LinearLayout>
 
+                    <!-- "Voice is on" / "Voice is muted" (the mute buttons on Camera and Results change this) -->
+                    <TextView
+                        android:id="@+id/voiceStatusText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textAppearance="@style/TextAppearance.App.Caption"/>
+
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

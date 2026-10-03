@@ -1,6 +1,7 @@
 package com.dentalscan
 
 import android.os.Bundle
+import android.widget.LinearLayout
 import android.widget.TextView
 import com.dentalscan.utils.LanguageManager
 
@@ -65,7 +66,7 @@ class AboutActivity : BaseActivity() {
             if (isUrdu) """
 پلیٹ فارم: اینڈرائیڈ (کم از کم Android 7.1.1)
 پروگرامنگ زبان: Kotlin
-AI ماڈل: YOLOv8n (TensorFlow Lite)
+AI ماڈل: YOLOv8s (TensorFlow Lite)
 ڈیٹا بیس: Room (SQLite)
 زبانیں: اردو اور انگریزی
 انٹرنیٹ: مکمل آف لائن — کوئی انٹرنیٹ درکار نہیں
@@ -73,34 +74,32 @@ AI ماڈل: YOLOv8n (TensorFlow Lite)
             """.trimIndent() else """
 Platform: Android (Minimum Android 7.1.1)
 Programming Language: Kotlin
-AI Model: YOLOv8n (TensorFlow Lite)
+AI Model: YOLOv8s (TensorFlow Lite)
 Database: Room (SQLite)
 Languages: Urdu and English
 Internet: Fully Offline — no internet required
 Purpose: Dental health awareness and education
             """.trimIndent()
 
-        // Detection model details (values taken from the app's own model settings)
-        findViewById<TextView>(R.id.aboutModelTitle).text =
-            if (isUrdu) "ڈیٹیکشن ماڈل" else "Detection Model"
-        findViewById<TextView>(R.id.aboutModelInfo).text =
-            if (isUrdu) """
-آرکیٹیکچر: YOLOv8n (نینو آبجیکٹ ڈیٹیکٹر)
-رن ٹائم: TensorFlow Lite (آلے پر)
-ان پٹ سائز: 640 × 640
-کلاسز: 3 (کیریز، کیلکولس، مسوڑوں کی سوزش)
-ڈیٹیکشن حد: 25% اعتماد، NMS IoU 0.45
-ماڈل کا سائز: تقریباً 3.2 MB
-پرائیویسی: تصاویر آپ کے آلے ہی پر رہتی ہیں
-            """.trimIndent() else """
-Architecture: YOLOv8n (nano object detector)
-Runtime: TensorFlow Lite, fully on-device
-Input size: 640 × 640
-Classes: 3 (Caries, Calculus, Gingivitis)
-Detection threshold: 25% confidence, NMS IoU 0.45
-Model size: about 3.2 MB
-Privacy: images never leave your device
-            """.trimIndent()
+        // AI Model Details: a label / value table (English and Urdu text come from strings.xml)
+        findViewById<TextView>(R.id.aboutModelTitle).text = getString(R.string.ai_model_details)
+        val table = findViewById<LinearLayout>(R.id.aboutModelTable)
+        table.removeAllViews()
+        listOf(
+            R.string.model_label_model to R.string.model_value_model,
+            R.string.model_label_dataset to R.string.model_value_dataset,
+            R.string.model_label_classes to R.string.model_value_classes,
+            R.string.model_label_accuracy to R.string.model_value_accuracy,
+            R.string.model_label_input to R.string.model_value_input,
+            R.string.model_label_format to R.string.model_value_format,
+            R.string.model_label_training to R.string.model_value_training
+        ).forEach { (label, value) ->
+            val row = layoutInflater.inflate(R.layout.item_model_row, table, false)
+            row.findViewById<TextView>(R.id.rowLabel).setText(label)
+            row.findViewById<TextView>(R.id.rowValue).setText(value)
+            table.addView(row)
+        }
+        findViewById<TextView>(R.id.aboutModelInfo).text = getString(R.string.model_footnote)
 
         // Disclaimer note (warning icon lives in the layout)
         findViewById<TextView>(R.id.aboutDisclaimerNote).text =
