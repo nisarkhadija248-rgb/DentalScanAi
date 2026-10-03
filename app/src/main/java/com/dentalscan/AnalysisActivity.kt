@@ -27,6 +27,7 @@ import com.dentalscan.utils.ActionPlanBuilder
 import com.dentalscan.utils.PhotoLoader
 import com.dentalscan.utils.AngleNames
 import com.dentalscan.utils.HealthScore
+import com.dentalscan.utils.RiskAssessment
 import android.graphics.RectF
 import android.widget.ScrollView
 import java.io.File
@@ -1177,15 +1178,18 @@ class AnalysisActivity : BaseActivity() {
                 .insertScan(scan)
 
             // Score after this scan, saved to the profile
-            val newScore = HealthScore.compute(earlierScans + scan.copy(id = newId)) ?: HealthScore.START
+            val scansNow = earlierScans + scan.copy(id = newId)
+            val newScore = HealthScore.compute(scansNow) ?: HealthScore.START
             HealthScore.sync(this@AnalysisActivity, newScore)
+            // Risk level from the last 5 scans (null below 3 scans)
+            val risk = RiskAssessment.assess(scansNow)
 
             withContext(Dispatchers.Main) {
                 val msg = if (isUrdu) "ریکارڈ محفوظ ہو گیا" else "Scan saved successfully"
                 VoiceFeedback.speak(msg)
                 if (previousScore != null) {
                     // The profile had earlier scans: show how this one changed the score, then "Done"
-                    showScoreUpdate(previousScore, newScore)
+                    showScoreUpdate(previousScore, newScore, risk)
                 } else {
                     finish()
                 }
@@ -1194,7 +1198,7 @@ class AnalysisActivity : BaseActivity() {
     }
 
     /** Score card: old score, arrow up (green) / down (red), new score counting up or down, message. */
-    private fun showScoreUpdate(previous: Int, now: Int) {
+    private fun showScoreUpdate(previous: Int, now: Int, risk: RiskAssessment.Result?) {
         val change = now - previous
         val card = findViewById<View>(R.id.scoreCard)
         val oldText = findViewById<TextView>(R.id.scoreOldText)
@@ -1240,6 +1244,21 @@ class AnalysisActivity : BaseActivity() {
 
         card.visibility = View.VISIBLE
         playIn(card, 0L, dy = dp(24).toFloat())
+
+        // Updated risk level, only when there are at least 3 saved scans
+        if (risk != null) {
+            val riskCard = findViewById<View>(R.id.resultRiskCard)
+            val badge = findViewById<TextView>(R.id.resultRiskBadge)
+            findViewById<TextView>(R.id.resultRiskTitle).text = getString(R.string.risk_title)
+            badge.text = getString(risk.level.labelRes)
+            badge.backgroundTintList =
+                ColorStateList.valueOf(ContextCompat.getColor(this, risk.level.colorRes))
+            badge.setTextColor(ContextCompat.getColor(this, risk.level.onColorRes))
+            findViewById<TextView>(R.id.resultRiskRecommendation).text =
+                getString(risk.level.recommendationRes)
+            riskCard.visibility = View.VISIBLE
+            playIn(riskCard, 250L, dy = dp(24).toFloat())
+        }
         resultScroll.post { resultScroll.smoothScrollTo(0, card.top) }
 
         // Saving is finished: the button now just closes the screen

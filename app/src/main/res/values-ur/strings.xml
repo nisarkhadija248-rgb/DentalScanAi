@@ -18,6 +18,28 @@
     <string name="medium_confidence">درمیانی یقین</string>
     <string name="low_confidence">کم یقین</string>
 
+    <!-- ===================== خطرے کا جائزہ ===================== -->
+    <string name="risk_title">خطرے کا جائزہ</string>
+    <string name="risk_low">کم خطرہ</string>
+    <string name="risk_medium">درمیانی خطرہ</string>
+    <string name="risk_high">زیادہ خطرہ</string>
+    <string name="risk_critical">انتہائی خطرہ</string>
+    <string name="risk_not_enough">ناکافی ڈیٹا</string>
+    <string name="risk_not_enough_hint">اپنا خطرے کی سطح دیکھنے کے لیے کم از کم 3 اسکین محفوظ کریں۔ آپ کے پاس %1$d ہیں۔</string>
+    <string name="risk_explain_counts">آپ کے آخری %1$d اسکینز میں: %2$d زیادہ شدت اور %3$d درمیانی شدت کے تھے۔</string>
+    <string name="risk_explain_conditions">پائی گئی بیماریاں (%1$d): %2$s۔</string>
+    <string name="risk_explain_no_conditions">کوئی بیماری نہیں ملی۔</string>
+    <string name="risk_reason_critical">ان میں سے 3 یا زیادہ اسکین زیادہ شدت کے تھے۔</string>
+    <string name="risk_reason_high">2 یا زیادہ اسکین زیادہ شدت کے، یا 3 یا زیادہ درمیانی شدت کے تھے۔</string>
+    <string name="risk_reason_medium">1 اسکین زیادہ شدت کا، یا 2 اسکین درمیانی شدت کے تھے۔</string>
+    <string name="risk_reason_low">2 سے کم درمیانی شدت کے اسکین اور کوئی زیادہ شدت کا اسکین نہیں۔</string>
+    <string name="risk_rec_critical">فوراً ڈینٹسٹ سے ملیں</string>
+    <string name="risk_rec_high">اسی ہفتے ڈینٹسٹ کا وقت لیں</string>
+    <string name="risk_rec_medium">ایک مہینے کے اندر دانتوں کے معائنے پر غور کریں</string>
+    <string name="risk_rec_low">شاباش! اسی طرح جاری رکھیں۔ اگلا معائنہ 6 ماہ بعد</string>
+    <string name="risk_info_title">یہ کیسے طے ہوتا ہے؟</string>
+    <string name="risk_info_text">آپ کے خطرے کی سطح آپ کے آخری 5 محفوظ اسکینز سے طے ہوتی ہے (کم از کم 3 درکار ہیں)۔\n\nانتہائی: 3 یا زیادہ اسکین زیادہ شدت کے۔\nزیادہ: 2 یا زیادہ اسکین زیادہ شدت کے، یا 3 یا زیادہ درمیانی شدت کے۔\nدرمیانی: 1 اسکین زیادہ شدت کا، یا 2 درمیانی شدت کے۔\nکم: باقی تمام صورتیں۔\n\nاسکین کی شدت اس بات سے طے ہوتی ہے کہ AI کو اپنی سب سے سنگین نشاندہی پر کتنا یقین ہے۔ یہ صرف اسکریننگ میں مدد ہے، طبی تشخیص نہیں۔</string>
+
     <!-- ===================== دانتوں کی صحت کا اسکور ===================== -->
     <string name="health_score_title">دانتوں کی صحت کا اسکور</string>
     <string name="health_good">اچھا</string>

@@ -31,6 +31,28 @@
     <!-- Scan Result -->
     <string name="scan_result">Scan Result</string>
 
+    <!-- ===================== Risk Assessment ===================== -->
+    <string name="risk_title">Risk Assessment</string>
+    <string name="risk_low">Low Risk</string>
+    <string name="risk_medium">Medium Risk</string>
+    <string name="risk_high">High Risk</string>
+    <string name="risk_critical">Critical Risk</string>
+    <string name="risk_not_enough">Not enough data</string>
+    <string name="risk_not_enough_hint">Save at least 3 scans to see your risk level. You have %1$d.</string>
+    <string name="risk_explain_counts">In your last %1$d scans: %2$d high severity, %3$d medium severity.</string>
+    <string name="risk_explain_conditions">Conditions found (%1$d): %2$s.</string>
+    <string name="risk_explain_no_conditions">No conditions were found.</string>
+    <string name="risk_reason_critical">3 or more of these scans were high severity.</string>
+    <string name="risk_reason_high">2 or more were high severity, or 3 or more were medium severity.</string>
+    <string name="risk_reason_medium">1 was high severity, or 2 were medium severity.</string>
+    <string name="risk_reason_low">Fewer than 2 medium-severity scans and no high-severity scans.</string>
+    <string name="risk_rec_critical">Visit a dentist immediately</string>
+    <string name="risk_rec_high">Schedule dentist appointment this week</string>
+    <string name="risk_rec_medium">Consider dental checkup within a month</string>
+    <string name="risk_rec_low">Keep up the good work! Next checkup in 6 months</string>
+    <string name="risk_info_title">How is this calculated?</string>
+    <string name="risk_info_text">Your risk level comes from your last 5 saved scans (at least 3 are needed).\n\nCritical: 3 or more high-severity scans.\nHigh: 2 or more high-severity scans, or 3 or more medium-severity scans.\nMedium: 1 high-severity scan, or 2 medium-severity scans.\nLow: anything else.\n\nA scan\'s severity comes from how confident the AI is about its worst finding. This is a screening aid, not a medical diagnosis.</string>
+
     <!-- ===================== Dental Health Score ===================== -->
     <string name="health_score_title">Dental Health Score</string>
     <string name="health_good">Good</string>

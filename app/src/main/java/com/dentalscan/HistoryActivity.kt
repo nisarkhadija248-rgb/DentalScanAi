@@ -16,6 +16,7 @@ import android.graphics.Color
 import android.widget.LinearLayout
 import com.dentalscan.utils.ConditionStyle
 import com.dentalscan.utils.HealthScore
+import com.dentalscan.utils.RiskAssessment
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
@@ -96,6 +97,7 @@ class HistoryActivity : BaseActivity() {
                 progressFeedbackText.visibility = View.GONE
                 statsCard.visibility = View.GONE
                 healthScoreCard.visibility = View.GONE
+                findViewById<View>(R.id.riskCard).visibility = View.GONE
                 HealthScore.sync(this@HistoryActivity, null) // no scans: back to the starting 100
             } else {
                 emptyText.visibility = View.GONE
@@ -122,8 +124,55 @@ class HistoryActivity : BaseActivity() {
                 showProgressFeedback(scans)
                 showStats(scans, isUrdu)
                 showHealthScore(scans)
+                showRisk(scans)
             }
         }
+    }
+
+    /** Risk Assessment card from the last 5 scans, or "Not enough data" below 3 scans. */
+    private fun showRisk(scans: List<com.dentalscan.data.ScanEntity>) {
+        val card = findViewById<View>(R.id.riskCard)
+        val badge = findViewById<TextView>(R.id.riskBadge)
+        val explanation = findViewById<TextView>(R.id.riskExplanation)
+        val recommendation = findViewById<TextView>(R.id.riskRecommendation)
+        val infoText = findViewById<TextView>(R.id.riskInfoText)
+
+        findViewById<TextView>(R.id.riskTitle).text = getString(R.string.risk_title)
+        infoText.text = getString(R.string.risk_info_text)
+
+        // The info button shows / hides the explanation of how the level is worked out
+        findViewById<View>(R.id.riskInfoButton).setOnClickListener {
+            infoText.visibility = if (infoText.visibility == View.VISIBLE) View.GONE else View.VISIBLE
+        }
+
+        val result = RiskAssessment.assess(scans)
+        if (result == null) {
+            // Neutral grey badge, no recommendation yet
+            badge.text = getString(R.string.risk_not_enough)
+            badge.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, R.color.surface_variant))
+            badge.setTextColor(ContextCompat.getColor(this, R.color.text_secondary))
+            explanation.text = getString(R.string.risk_not_enough_hint, scans.size)
+            recommendation.visibility = View.GONE
+        } else {
+            val level = result.level
+            badge.text = getString(level.labelRes)
+            badge.backgroundTintList = ColorStateList.valueOf(ContextCompat.getColor(this, level.colorRes))
+            badge.setTextColor(ContextCompat.getColor(this, level.onColorRes))
+            explanation.text = RiskAssessment.explanation(this, result)
+
+            recommendation.text = getString(level.recommendationRes)
+            recommendation.setTextColor(ContextCompat.getColor(this, R.color.text_primary))
+            val icon = ContextCompat.getDrawable(
+                this,
+                if (level == RiskAssessment.Level.LOW) R.drawable.ic_check_circle else R.drawable.ic_warning
+            )?.mutate()
+            val size = (20 * resources.displayMetrics.density).toInt()
+            icon?.setBounds(0, 0, size, size)
+            icon?.setTint(ContextCompat.getColor(this, level.colorRes))
+            recommendation.setCompoundDrawablesRelative(icon, null, null, null)
+            recommendation.visibility = View.VISIBLE
+        }
+        card.visibility = View.VISIBLE
     }
 
     /** Prominent score card: arc gauge in the score's colour, label, and the change over the last 30 days. */
