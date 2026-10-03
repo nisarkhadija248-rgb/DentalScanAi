@@ -25,6 +25,10 @@ import com.dentalscan.utils.ConditionEducation
 import com.dentalscan.utils.ConditionStyle
 import com.dentalscan.utils.ActionPlanBuilder
 import com.dentalscan.utils.PhotoLoader
+import com.dentalscan.utils.AngleNames
+import android.graphics.RectF
+import android.widget.ScrollView
+import java.io.File
 import android.graphics.Paint
 import android.provider.Settings
 import android.view.animation.OvershootInterpolator
@@ -107,9 +111,29 @@ class AnalysisActivity : BaseActivity() {
     private var pulseAnimator: ValueAnimator? = null
     private var gaugeAnimator: ValueAnimator? = null
 
+    private lateinit var multiConditionsText: TextView
+    private lateinit var resultScroll: ScrollView
+
     private var tfliteHelper: TFLiteHelper? = null
+    // One detection per condition (the highest confidence one), worst first. Drives the summary,
+    // the Action Plan and what gets saved as the scan's main condition.
     private var currentDetections: List<TFLiteHelper.Detection> = emptyList()
     private var imagePath: String = ""
+
+    /** A detection together with the capture angle (0..4) it was found in. */
+    private class Hit(val detection: TFLiteHelper.Detection, val angle: Int)
+
+    // Multi-angle state. anglePaths has one slot per capture step ("" = skipped step).
+    private var anglePaths: List<String> = emptyList()
+    private var anglesTrusted = false
+    private var allHits: List<Hit> = emptyList()      // every detection from every angle
+    private var mergedHits: List<Hit> = emptyList()   // one per condition, worst first
+    private val angleBitmaps = HashMap<Int, Bitmap>() // annotated 640x640 image per angle
+    private var selectedAngle = 0
+    private var angleSwitchEnabled = false            // false while the analysis is still running
+    private class ThumbRef(val card: MaterialCardView, val strokeWidth: Int, val strokeColor: Int)
+    private val thumbRefs = HashMap<Int, ThumbRef>()
+    private val conditionGaugeAnimators = mutableListOf<ValueAnimator>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -168,8 +192,15 @@ class AnalysisActivity : BaseActivity() {
         photosSection = findViewById(R.id.photosSection)
         photosLabel = findViewById(R.id.photosLabel)
         photosList = findViewById(R.id.photosList)
+        multiConditionsText = findViewById(R.id.multiConditionsText)
+        resultScroll = findViewById(R.id.resultScroll)
 
         imagePath = intent.getStringExtra("image_path") ?: return
+
+        // One slot per capture step; "" = skipped step. Plain-path (old) scans give a single slot.
+        anglePaths = ScanEntity(imagePath = imagePath).getAllImagePaths()
+        anglesTrusted = AngleNames.positionsAreAngles(anglePaths)
+        selectedAngle = anglePaths.indexOfFirst { it.isNotEmpty() }.coerceAtLeast(0)
 
         val isUrdu = LanguageManager.isUrdu(this)
         setupLegend(isUrdu)
@@ -198,10 +229,21 @@ class AnalysisActivity : BaseActivity() {
             // imagePath may be a JSON array or a plain path — getThumbnailPath handles both
             val tempScan = com.dentalscan.data.ScanEntity(imagePath = imagePath)
             val bitmap = BitmapFactory.decodeFile(tempScan.getThumbnailPath())
-            imageView.setImageBitmap(bitmap)
+            imageView.setImageBitmap(bitmap) // shown at once, replaced by the annotated photo below
+
+            // Rebuild what was found (and in which angle) from the saved scan.
+            // Scans saved before multi-angle analysis have no angle: everything counts as angle 0.
+            allHits = parseSavedHits(intent.getStringExtra("bounding_boxes"))
+            mergedHits = mergeHits(allHits)
+            if (mergedHits.isEmpty() && condition.isNotEmpty()) {
+                // Nothing usable saved: show just the main condition (display only, no box to draw)
+                mergedHits = listOf(Hit(TFLiteHelper.Detection(0, condition, confidence, RectF()), 0))
+            }
+            angleSwitchEnabled = true
 
             showResultUi(condition, (confidence * 100).toInt(), severity, isUrdu)
-            showFindings(parseSavedDetections(intent.getStringExtra("bounding_boxes")), isUrdu)
+            showConditions(mergedHits, isUrdu)
+            selectAngle(selectedAngle)
 
             // Show educational content in view only mode too
             if (condition.isNotEmpty() && severity.isNotEmpty()) {
@@ -235,11 +277,14 @@ class AnalysisActivity : BaseActivity() {
             try {
                 tfliteHelper = TFLiteHelper(this@AnalysisActivity)
 
-                // imagePath may be a JSON array OR a plain path
-                // Always extract the front view (index 0) for analysis
-                val frontPath = extractFrontPath(imagePath)
+                // Angles that actually have a photo (skipped steps are "" and missing files are ignored).
+                // In dummy mode only the first photo is analysed (it returns a fake result).
+                val existing = anglePaths.indices.filter {
+                    anglePaths[it].isNotEmpty() && File(anglePaths[it]).exists()
+                }
+                val toAnalyse = if (TFLiteHelper.DUMMY_MODE) existing.take(1) else existing
 
-                if (frontPath.isEmpty()) {
+                if (toAnalyse.isEmpty()) {
                     withContext(Dispatchers.Main) {
                         val isUrdu = LanguageManager.isUrdu(this@AnalysisActivity)
                         hideLoading()
@@ -249,26 +294,37 @@ class AnalysisActivity : BaseActivity() {
                     return@launch
                 }
 
-                val bitmap = BitmapFactory.decodeFile(frontPath)
-
-                if (bitmap == null) {
+                // One photo after the other on this background thread (the model is shared)
+                val hits = mutableListOf<Hit>()
+                val annotated = HashMap<Int, Bitmap>()
+                var analysed = 0
+                toAnalyse.forEachIndexed { n, angle ->
                     withContext(Dispatchers.Main) {
-                        val isUrdu = LanguageManager.isUrdu(this@AnalysisActivity)
-                        hideLoading()
-                        resultText.text = if (isUrdu) "تصویر نہیں ملی" else "Image not found"
-                        confidenceText.text = if (isUrdu) "دوبارہ اسکین کریں" else "Please retake scan"
+                        confidenceText.text =
+                            getString(R.string.analysing_angle, n + 1, toAnalyse.size)
                     }
-                    return@launch
+
+                    val raw = BitmapFactory.decodeFile(anglePaths[angle]) ?: return@forEachIndexed
+                    val scaled = Bitmap.createScaledBitmap(raw, 640, 640, true)
+
+                    // Show the photo being analysed so the scan line sweeps over it
+                    withContext(Dispatchers.Main) { imageView.setImageBitmap(scaled) }
+
+                    val found = try {
+                        tfliteHelper?.detect(scaled) ?: emptyList()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        return@forEachIndexed // one bad photo must not stop the others
+                    }
+                    analysed++
+
+                    found.forEach { hits += Hit(it, angle) }
+                    annotated[angle] = if (found.isEmpty()) scaled else ImageUtils.drawDetections(scaled, found)
                 }
+                if (analysed == 0) throw IllegalStateException("No photo could be analysed")
 
-                val scaledBitmap = Bitmap.createScaledBitmap(bitmap, 640, 640, true)
-
-                // Show the photo right away so the scan line has something to sweep over
-                withContext(Dispatchers.Main) { imageView.setImageBitmap(scaledBitmap) }
-
-                currentDetections = tfliteHelper?.detect(scaledBitmap) ?: emptyList()
-                val resultBitmap = ImageUtils.drawDetections(scaledBitmap, currentDetections)
-                val primaryDetection = currentDetections.maxByOrNull { it.confidence }
+                val merged = mergeHits(hits)
+                val primaryDetection = merged.firstOrNull()?.detection
 
                 // Inference is very fast on-device; keep the scanning animation visible
                 // long enough to be seen (presentation only, the result is already computed)
@@ -281,7 +337,18 @@ class AnalysisActivity : BaseActivity() {
                 if (remaining > 0) kotlinx.coroutines.delay(remaining)
 
                 withContext(Dispatchers.Main) {
-                    imageView.setImageBitmap(resultBitmap)
+                    allHits = hits
+                    mergedHits = merged
+                    currentDetections = merged.map { it.detection }
+                    angleBitmaps.clear()
+                    angleBitmaps.putAll(annotated)
+
+                    // Main image: the front view (first photo) with its own boxes
+                    selectedAngle = toAnalyse.first()
+                    updateThumbSelection()
+                    imageView.setImageBitmap(annotated[selectedAngle])
+                    angleSwitchEnabled = true
+
                     displayResults(primaryDetection)
                 }
 
@@ -298,24 +365,14 @@ class AnalysisActivity : BaseActivity() {
     }
 
     /**
-     * Extracts the front view path from either:
-     * - A JSON array string: ["path1","path2"] → returns path1
-     * - A plain path string: /data/scan.jpg → returns as-is
+     * One hit per condition: the highest-confidence detection of that condition across all angles
+     * (the lowest angle wins a tie), sorted worst (highest confidence) first.
      */
-    private fun extractFrontPath(path: String): String {
-        return try {
-            if (path.trim().startsWith("[")) {
-                // It's a JSON array — extract index 0
-                val arr = JSONArray(path)
-                if (arr.length() > 0) arr.getString(0) else ""
-            } else {
-                // Plain path — use directly
-                path
-            }
-        } catch (e: Exception) {
-            path // fallback
-        }
-    }
+    private fun mergeHits(hits: List<Hit>): List<Hit> =
+        hits.groupBy { ConditionStyle.of(it.detection.className)?.shortName ?: it.detection.className }
+            .values
+            .map { group -> group.maxByOrNull { it.detection.confidence }!! }
+            .sortedByDescending { it.detection.confidence }
 
     private fun displayResults(detection: TFLiteHelper.Detection?) {
         val isUrdu = LanguageManager.isUrdu(this)
@@ -324,6 +381,8 @@ class AnalysisActivity : BaseActivity() {
             resultText.text = if (isUrdu) "کوئی مسئلہ نہیں ملا" else "No dental issues detected"
             confidenceText.text = if (isUrdu) "آپ کے دانت صحت مند ہیں" else "Your teeth appear healthy"
             showHealthyUi()
+            multiConditionsText.visibility = View.GONE
+            findingsCard.visibility = View.GONE
             // Nothing to save when nothing was detected, so don't offer a Save button that does nothing
             saveButton.visibility = View.GONE
             VoiceFeedback.speak(if (isUrdu) "کوئی مسئلہ نہیں ملا" else "No dental issues detected")
@@ -335,7 +394,7 @@ class AnalysisActivity : BaseActivity() {
         val severity = ImageUtils.getSeverityText(detection.confidence)
 
         showResultUi(condition, confidence, severity, isUrdu)
-        showFindings(currentDetections.map { it.className to it.confidence }, isUrdu)
+        showConditions(mergedHits, isUrdu)
 
         VoiceFeedback.speakDetectionResult(condition, severity, isUrdu)
 
@@ -414,36 +473,33 @@ class AnalysisActivity : BaseActivity() {
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
     /**
-     * Scrollable row with every captured photo. Photo 1 is always the front view
-     * (the first step cannot be skipped) and is the one the model analyses.
-     * Tap a thumbnail to see it larger. Display only; analysis is unchanged.
+     * Scrollable row with a thumbnail for every captured angle (skipped steps are left out).
+     * Tap one to show that photo, with its own boxes, in the main image; long-press to enlarge it.
+     * The selected thumbnail has a teal outline.
      */
     private fun setupPhotos(isUrdu: Boolean) {
-        val paths = ScanEntity(imagePath = imagePath).getAllImagePaths().filter { it.isNotEmpty() }
-        if (paths.isEmpty()) return
+        val present = anglePaths.withIndex().filter { it.value.isNotEmpty() }
+        if (present.isEmpty()) return
 
-        photosLabel.text = if (isUrdu) "لی گئی تصاویر (${paths.size})" else "Captured photos (${paths.size})"
+        photosLabel.text = getString(R.string.photos_captured, present.size)
         photosSection.visibility = View.VISIBLE
         photosList.removeAllViews()
+        thumbRefs.clear()
 
-        paths.forEachIndexed { index, path ->
+        present.forEach { (index, path) ->
             val item = layoutInflater.inflate(R.layout.item_photo_thumb, photosList, false)
             val card = item.findViewById<MaterialCardView>(R.id.thumbCard)
             val img = item.findViewById<ImageView>(R.id.thumbImage)
             val label = item.findViewById<TextView>(R.id.thumbLabel)
 
-            label.text = when {
-                index == 0 -> if (isUrdu) "سامنے (تجزیہ)" else "Front · analysed"
-                else -> if (isUrdu) "تصویر ${index + 1}" else "Photo ${index + 1}"
-            }
+            label.text = AngleNames.label(this, index, anglesTrusted)
+            thumbRefs[index] = ThumbRef(card, card.strokeWidth, card.strokeColor)
 
-            // Outline the photo that was analysed
-            if (index == 0) {
-                card.strokeColor = ContextCompat.getColor(this, R.color.primary)
-                card.strokeWidth = dp(2)
+            item.setOnClickListener { selectAngle(index) }
+            item.setOnLongClickListener {
+                showPhotoDialog(path, label.text.toString(), isUrdu)
+                true
             }
-
-            item.setOnClickListener { showPhotoDialog(path, label.text.toString(), isUrdu) }
             photosList.addView(item)
 
             lifecycleScope.launch {
@@ -456,6 +512,47 @@ class AnalysisActivity : BaseActivity() {
                 }
             }
         }
+        updateThumbSelection()
+    }
+
+    /** Teal outline on the selected angle's thumbnail, the normal outline on the others. */
+    private fun updateThumbSelection() {
+        thumbRefs.forEach { (index, ref) ->
+            if (index == selectedAngle) {
+                ref.card.strokeColor = ContextCompat.getColor(this, R.color.primary)
+                ref.card.strokeWidth = dp(2)
+            } else {
+                ref.card.strokeColor = ref.strokeColor
+                ref.card.strokeWidth = ref.strokeWidth
+            }
+        }
+    }
+
+    /** Show [angle]'s photo with the boxes found in it. Ignored while the analysis is running. */
+    private fun selectAngle(angle: Int) {
+        if (!angleSwitchEnabled) return
+        selectedAngle = angle
+        updateThumbSelection()
+        lifecycleScope.launch {
+            val bmp = angleBitmaps[angle] ?: withContext(Dispatchers.IO) { buildAngleBitmap(angle) }
+            // The user may have tapped another angle while this one was loading
+            if (bmp != null && selectedAngle == angle) {
+                angleBitmaps[angle] = bmp
+                imageView.setImageBitmap(bmp)
+            }
+        }
+    }
+
+    /**
+     * The photo of [angle] at 640x640 with the boxes of the detections found in it.
+     * Used for saved scans, and for angles that were not analysed (dummy mode): then no boxes.
+     */
+    private fun buildAngleBitmap(angle: Int): Bitmap? {
+        val path = anglePaths.getOrNull(angle)?.takeIf { it.isNotEmpty() } ?: return null
+        val raw = BitmapFactory.decodeFile(path) ?: return null
+        val scaled = Bitmap.createScaledBitmap(raw, 640, 640, true)
+        val found = allHits.filter { it.angle == angle }.map { it.detection }
+        return if (found.isEmpty()) scaled else ImageUtils.drawDetections(scaled, found)
     }
 
     private fun showPhotoDialog(path: String, title: String, isUrdu: Boolean) {
@@ -694,6 +791,38 @@ class AnalysisActivity : BaseActivity() {
         }
     }
 
+    /**
+     * Every detection saved with a scan, with the angle it came from. Entries from scans saved
+     * before multi-angle analysis have no "angle" and count as angle 0 (the front view).
+     */
+    private fun parseSavedHits(json: String?): List<Hit> {
+        if (json.isNullOrBlank()) return emptyList()
+        val classOrder = listOf("calculus", "caries", "gingivitis")
+        return try {
+            val arr = JSONArray(json)
+            (0 until arr.length()).mapNotNull { i ->
+                val o = arr.getJSONObject(i)
+                val name = o.optString("class")
+                if (name.isBlank()) return@mapNotNull null
+                val cx = o.optDouble("x", 0.0).toFloat()
+                val cy = o.optDouble("y", 0.0).toFloat()
+                val w = o.optDouble("width", 0.0).toFloat()
+                val h = o.optDouble("height", 0.0).toFloat()
+                Hit(
+                    TFLiteHelper.Detection(
+                        classId = classOrder.indexOf(name.trim().lowercase()).coerceAtLeast(0),
+                        className = name,
+                        confidence = o.optDouble("confidence", 0.0).toFloat(),
+                        boundingBox = RectF(cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2)
+                    ),
+                    o.optInt("angle", 0)
+                )
+            }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
     /** Reads the detections that were saved with a scan (JSON written by detectionsToJson). */
     private fun parseSavedDetections(json: String?): List<Pair<String, Float>> {
         if (json.isNullOrBlank()) return emptyList()
@@ -708,46 +837,77 @@ class AnalysisActivity : BaseActivity() {
         }
     }
 
-    /** One row per detected region: condition color dot, name, confidence. Display only. */
-    private fun showFindings(detections: List<Pair<String, Float>>, isUrdu: Boolean) {
+    /**
+     * "CONDITIONS FOUND (N)": one row per condition (highest confidence across all angles) with a
+     * small animated gauge, the condition name in its color and the angle it was found in.
+     * Tapping a row jumps to that angle's photo. Also shows "N conditions detected" at the top
+     * of the result card when there is more than one. Display only.
+     */
+    private fun showConditions(hits: List<Hit>, isUrdu: Boolean) {
+        conditionGaugeAnimators.forEach { it.cancel() }
+        conditionGaugeAnimators.clear()
         findingsList.removeAllViews()
-        val rows = detections.sortedByDescending { it.second }.take(6)
-        if (rows.isEmpty()) {
+
+        if (hits.isEmpty()) {
             findingsCard.visibility = View.GONE
+            multiConditionsText.visibility = View.GONE
             return
         }
 
-        findingsTitle.text =
-            if (isUrdu) "نشاندہی شدہ حصے (${detections.size})" else "Detected regions (${detections.size})"
+        if (hits.size > 1) {
+            multiConditionsText.text = getString(R.string.conditions_detected_summary, hits.size)
+            multiConditionsText.visibility = View.VISIBLE
+        } else {
+            multiConditionsText.visibility = View.GONE
+        }
 
-        rows.forEach { (name, confidence) ->
-            val row = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = android.view.Gravity.CENTER_VERTICAL
-                setPadding(0, dp(6), 0, dp(6))
+        findingsTitle.text = getString(R.string.conditions_found, hits.size)
+
+        hits.forEachIndexed { i, hit ->
+            val name = hit.detection.className
+            val pct = (hit.detection.confidence * 100).toInt().coerceIn(0, 100)
+            val color = ConditionStyle.color(this, name)
+
+            val row = layoutInflater.inflate(R.layout.item_condition_found, findingsList, false)
+            row.backgroundTintList = ColorStateList.valueOf(ConditionStyle.tint(this, name))
+
+            val gauge = row.findViewById<CircularProgressIndicator>(R.id.condGauge)
+            val gaugeText = row.findViewById<TextView>(R.id.condGaugeText)
+            gauge.setIndicatorColor(color)
+
+            val title = row.findViewById<TextView>(R.id.condName)
+            title.text = ConditionStyle.displayName(name, isUrdu)
+            title.setTextColor(color)
+            row.findViewById<TextView>(R.id.condFoundIn).text =
+                getString(R.string.found_in, AngleNames.label(this, hit.angle, anglesTrusted))
+
+            row.setOnClickListener {
+                if (anglePaths.getOrNull(hit.angle).isNullOrEmpty()) return@setOnClickListener
+                selectAngle(hit.angle)
+                resultScroll.smoothScrollTo(0, 0)
             }
 
-            val dot = View(this).apply {
-                layoutParams = LinearLayout.LayoutParams(dp(10), dp(10)).apply { marginEnd = dp(10) }
-                setBackgroundResource(R.drawable.bg_dot)
-                backgroundTintList = ColorStateList.valueOf(ConditionStyle.color(this@AnalysisActivity, name))
+            // Gauge fills after the card has slid in
+            if (animationsEnabled()) {
+                gauge.setProgressCompat(0, false)
+                gaugeText.text = "0%"
+                val anim = ValueAnimator.ofInt(0, pct).apply {
+                    startDelay = FINDINGS_DELAY_MS + 250L + i * 150L
+                    duration = 700
+                    interpolator = DecelerateInterpolator()
+                    addUpdateListener { a ->
+                        val v = a.animatedValue as Int
+                        gauge.setProgressCompat(v, false)
+                        gaugeText.text = "$v%"
+                    }
+                }
+                conditionGaugeAnimators += anim
+                anim.start()
+            } else {
+                gauge.setProgressCompat(pct, false)
+                gaugeText.text = "$pct%"
             }
 
-            val nameView = TextView(this).apply {
-                layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
-                text = ConditionStyle.displayName(name, isUrdu)
-                setTextAppearance(R.style.TextAppearance_App_Body)
-            }
-
-            val pct = TextView(this).apply {
-                text = "${(confidence * 100).toInt()}%"
-                setTextAppearance(R.style.TextAppearance_App_Title)
-                textSize = 15f
-            }
-
-            row.addView(dot)
-            row.addView(nameView)
-            row.addView(pct)
             findingsList.addView(row)
         }
 
@@ -979,7 +1139,9 @@ class AnalysisActivity : BaseActivity() {
             condition = detection.className,
             confidence = detection.confidence,
             severity = ImageUtils.getSeverityText(detection.confidence),
-            boundingBoxes = detectionsToJson(currentDetections),
+            // Main condition above is the worst one (History/Comparison use it). Every detection
+            // from every angle is stored here, each with its angle, to rebuild the view later.
+            boundingBoxes = detectionsToJson(allHits),
             checkedSteps = ActionPlanBuilder.encodeChecked(checkedSteps)
         )
 
@@ -996,10 +1158,12 @@ class AnalysisActivity : BaseActivity() {
         }
     }
 
-    private fun detectionsToJson(detections: List<TFLiteHelper.Detection>): String {
+    private fun detectionsToJson(hits: List<Hit>): String {
         val jsonArray = JSONArray()
-        detections.forEach { d ->
+        hits.forEach { hit ->
+            val d = hit.detection
             val obj = JSONObject().apply {
+                put("angle", hit.angle)
                 put("class", d.className)
                 put("confidence", d.confidence)
                 put("x", d.boundingBox.centerX())
@@ -1025,6 +1189,7 @@ class AnalysisActivity : BaseActivity() {
         scanAnimator?.cancel()
         pulseAnimator?.cancel()
         gaugeAnimator?.cancel()
+        conditionGaugeAnimators.forEach { it.cancel() }
         tfliteHelper?.close()
     }
 
