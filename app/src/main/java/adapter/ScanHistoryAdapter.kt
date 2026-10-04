@@ -19,7 +19,8 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 
 class ScanHistoryAdapter(
-    private val onItemClick: (ScanEntity) -> Unit
+    private val onItemClick: (ScanEntity) -> Unit,
+    private val onItemLongClick: ((ScanEntity) -> Unit)? = null
 ) : RecyclerView.Adapter<ScanHistoryAdapter.ViewHolder>() {
 
     private var scans: List<ScanEntity> = emptyList()
@@ -121,6 +122,10 @@ class ScanHistoryAdapter(
 
         holder.itemView.setOnClickListener {
             onItemClick(scan)
+        }
+        holder.itemView.setOnLongClickListener {
+            onItemLongClick?.invoke(scan)
+            onItemLongClick != null
         }
     }
 

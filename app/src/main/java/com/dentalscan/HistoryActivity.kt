@@ -16,7 +16,9 @@ import android.graphics.Color
 import android.widget.LinearLayout
 import com.dentalscan.utils.ConditionStyle
 import com.dentalscan.utils.HealthScore
+import com.dentalscan.utils.ReminderScheduler
 import com.dentalscan.utils.RiskAssessment
+import com.dentalscan.utils.ScanFiles
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
@@ -102,23 +104,27 @@ class HistoryActivity : BaseActivity() {
             } else {
                 emptyText.visibility = View.GONE
                 emptyState.visibility = View.GONE
-                historySubtitle.text = if (isUrdu) "${scans.size} ریکارڈ" else
+                val countText = if (isUrdu) "${scans.size} ریکارڈ" else
                     if (scans.size == 1) "1 scan" else "${scans.size} scans"
+                historySubtitle.text = "$countText · ${getString(R.string.history_hold_hint)}"
                 historySubtitle.visibility = View.VISIBLE
                 recyclerView.visibility = View.VISIBLE
-                val adapter = ScanHistoryAdapter { scan ->
-                    val intent = Intent(this@HistoryActivity, AnalysisActivity::class.java)
-                    intent.putExtra("image_path", scan.imagePath)
-                    intent.putExtra("view_only", true)
-                    intent.putExtra("condition", scan.condition)
-                    intent.putExtra("confidence", scan.confidence)
-                    intent.putExtra("severity", scan.severity)
-                    intent.putExtra("bounding_boxes", scan.boundingBoxes)
-                    // Needed by the Action Plan checklist: which scan to update, and what was ticked
-                    intent.putExtra("scan_id", scan.id)
-                    intent.putExtra("checked_steps", scan.checkedSteps)
-                    startActivity(intent)
-                }
+                val adapter = ScanHistoryAdapter(
+                    onItemClick = { scan ->
+                        val intent = Intent(this@HistoryActivity, AnalysisActivity::class.java)
+                        intent.putExtra("image_path", scan.imagePath)
+                        intent.putExtra("view_only", true)
+                        intent.putExtra("condition", scan.condition)
+                        intent.putExtra("confidence", scan.confidence)
+                        intent.putExtra("severity", scan.severity)
+                        intent.putExtra("bounding_boxes", scan.boundingBoxes)
+                        // Needed by the Action Plan checklist: which scan to update, and what was ticked
+                        intent.putExtra("scan_id", scan.id)
+                        intent.putExtra("checked_steps", scan.checkedSteps)
+                        startActivity(intent)
+                    },
+                    onItemLongClick = { scan -> confirmDelete(scan) }
+                )
                 adapter.submitList(scans)
                 recyclerView.adapter = adapter
                 showProgressFeedback(scans)
@@ -126,6 +132,30 @@ class HistoryActivity : BaseActivity() {
                 showHealthScore(scans)
                 showRisk(scans)
             }
+        }
+    }
+
+    /** Asks first, then deletes the scan and its photo files. */
+    private fun confirmDelete(scan: com.dentalscan.data.ScanEntity) {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle(R.string.delete_scan_title)
+            .setMessage(R.string.delete_scan_message)
+            .setPositiveButton(R.string.delete_scan_confirm) { _, _ -> deleteScan(scan) }
+            .setNegativeButton(R.string.delete_scan_cancel, null)
+            .show()
+    }
+
+    private fun deleteScan(scan: com.dentalscan.data.ScanEntity) {
+        lifecycleScope.launch {
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                ScanFiles.deletePhotos(scan)
+                AppDatabase.getDatabase(this@HistoryActivity).scanDao().deleteScan(scan)
+                // Smart reminders follow the latest scan, so work the frequency out again
+                ReminderScheduler.updateAfterScan(this@HistoryActivity, HealthScore.scansFor(this@HistoryActivity))
+            }
+            android.widget.Toast.makeText(this@HistoryActivity, R.string.delete_scan_done, android.widget.Toast.LENGTH_SHORT).show()
+            // Reload: the list, score, risk, trend and stats are all worked out from the remaining scans
+            loadHistory()
         }
     }
 

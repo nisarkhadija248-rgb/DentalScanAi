@@ -15,6 +15,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.lifecycleScope
 import com.dentalscan.data.AppDatabase
 import com.dentalscan.utils.HealthScore
+import com.dentalscan.utils.ScanFiles
 import com.dentalscan.utils.VoiceFeedback
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -279,6 +280,7 @@ class SettingsActivity : BaseActivity() {
                 val database = AppDatabase.getDatabase(this@SettingsActivity)
                 database.scanDao().getAllScans().collect { scans ->
                     scans.forEach { scan ->
+                        ScanFiles.deletePhotos(scan)
                         database.scanDao().deleteScan(scan)
                     }
                     withContext(Dispatchers.Main) {

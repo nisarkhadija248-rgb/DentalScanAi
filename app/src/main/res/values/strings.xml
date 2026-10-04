@@ -31,6 +31,14 @@
     <!-- Scan Result -->
     <string name="scan_result">Scan Result</string>
 
+    <!-- ===================== Delete a scan ===================== -->
+    <string name="delete_scan_title">Delete this scan?</string>
+    <string name="delete_scan_message">This removes the scan and its photos. This cannot be undone.</string>
+    <string name="delete_scan_confirm">Delete</string>
+    <string name="delete_scan_cancel">Cancel</string>
+    <string name="delete_scan_done">Scan deleted</string>
+    <string name="history_hold_hint">Hold a scan to delete it</string>
+
     <!-- ===================== Smart reminders ===================== -->
     <string name="smart_option">Smart (Recommended)</string>
     <string name="freq_twice_daily">Twice a day</string>
