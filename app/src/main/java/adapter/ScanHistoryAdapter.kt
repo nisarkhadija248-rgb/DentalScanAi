@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import androidx.core.content.ContextCompat
 import com.dentalscan.utils.ConditionStyle
 import com.dentalscan.utils.LanguageManager
+import com.dentalscan.utils.PhotoLoader
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,7 +46,8 @@ class ScanHistoryAdapter(
 
         // Load thumbnail
         val thumbnailPath = scan.getThumbnailPath()
-        val bitmap = if (thumbnailPath.isNotEmpty()) BitmapFactory.decodeFile(thumbnailPath) else null
+        // All rows are laid out together now, so decode a small version of each photo (56dp thumbnail)
+        val bitmap = if (thumbnailPath.isNotEmpty()) PhotoLoader.decodeSampled(thumbnailPath, 120) else null
         if (bitmap != null) {
             holder.scanThumbnail.scaleType = ImageView.ScaleType.CENTER_CROP
             holder.scanThumbnail.setPadding(0, 0, 0, 0)

@@ -37,6 +37,20 @@
 
     </LinearLayout>
 
+    <!-- Everything below the header scrolls as one page: banner, score, risk, stats, then the scans -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/historyScroll"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
     <!-- Progress banner: tinted rounded pill, icon and colors set from code -->
     <TextView
         android:id="@+id/progressFeedbackText"
@@ -278,14 +292,17 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="wrap_content"
+        android:minHeight="360dp">
 
+        <!-- The page scrolls, not the list (so it is as tall as all its rows) -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:clipToPadding="false"
+            android:nestedScrollingEnabled="false"
+            android:overScrollMode="never"
             android:paddingTop="8dp"
             android:paddingBottom="16dp"/>
 
@@ -341,5 +358,9 @@
         </LinearLayout>
 
     </FrameLayout>
+
+    </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>
