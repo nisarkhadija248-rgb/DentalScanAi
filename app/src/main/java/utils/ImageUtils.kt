@@ -53,44 +53,38 @@ object ImageUtils {
             canvas.drawRoundRect(boxes[i], 8f, 8f, paint)
         }
 
-        // 2. Labels on filled pills in the box colour, placed so they do not cover each other
+        // 2. Labels on filled pills in the box colour. A label always stays right next to its own box:
+        // above it, or below it. If the full label ("Calculus 37%") would cover another label, a short one
+        // ("37%") is used instead. The colour tells which condition it is (see the legend under the photo).
         val placed = ArrayList<RectF>()
         ordered.forEachIndexed { i, d ->
             val rect = boxes[i]
-            val label = "${ConditionStyle.shortName(d.className)} ${(d.confidence * 100).toInt()}%"
-            val pillWidth = textPaint.measureText(label) + padX * 2
+            val percent = "${(d.confidence * 100).toInt()}%"
+            val full = "${ConditionStyle.shortName(d.className)} $percent"
 
-            // Keep the pill inside the picture horizontally
-            val left = rect.left.coerceIn(0f, max(0f, imageW - pillWidth))
+            // A pill for [text] next to the box at [top], kept inside the picture horizontally
+            fun pillFor(text: String, top: Float): RectF {
+                val w = textPaint.measureText(text) + padX * 2
+                val left = rect.left.coerceIn(0f, max(0f, imageW - w))
+                return RectF(left, top, left + w, top + pillHeight)
+            }
+            fun fits(r: RectF) = r.top >= 0f && r.bottom <= imageH && placed.none { RectF.intersects(it, r) }
 
-            // Try: above the box, below it, then stacked further above / below until one is free
-            val tops = ArrayList<Float>()
-            tops += rect.top - pillHeight
-            tops += rect.bottom
-            for (k in 1..4) {
-                tops += rect.top - pillHeight * (k + 1)
-                tops += rect.bottom + pillHeight * k
+            var text = full
+            var pill: RectF? = listOf(rect.top - pillHeight, rect.bottom).map { pillFor(full, it) }.firstOrNull { fits(it) }
+            if (pill == null) {
+                text = percent
+                pill = listOf(rect.top - pillHeight, rect.bottom).map { pillFor(percent, it) }.firstOrNull { fits(it) }
             }
-            var chosen: RectF? = null
-            for (top in tops) {
-                if (top < 0f || top + pillHeight > imageH) continue
-                val candidate = RectF(left, top, left + pillWidth, top + pillHeight)
-                if (placed.none { RectF.intersects(it, candidate) }) {
-                    chosen = candidate
-                    break
-                }
-            }
-            // No free spot: sit at the top of the box (the old behaviour)
-            val pillRect = chosen ?: RectF(
-                left, rect.top.coerceIn(0f, max(0f, imageH - pillHeight)),
-                left + pillWidth, rect.top.coerceIn(0f, max(0f, imageH - pillHeight)) + pillHeight
-            )
+            // Still no room: put the short label at the top of the box rather than far away
+            val pillRect = pill ?: pillFor(percent, rect.top.coerceIn(0f, max(0f, imageH - pillHeight)))
+            if (pill == null) text = percent
             placed += pillRect
 
             pillPaint.color = ConditionStyle.paintColor(d.className)
             canvas.drawRoundRect(pillRect, 10f, 10f, pillPaint)
             textPaint.color = ConditionStyle.paintTextColor(d.className)
-            canvas.drawText(label, pillRect.left + padX, pillRect.top + padY - metrics.ascent, textPaint)
+            canvas.drawText(text, pillRect.left + padX, pillRect.top + padY - metrics.ascent, textPaint)
         }
 
         return mutableBitmap
