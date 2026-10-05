@@ -18,6 +18,10 @@
     <string name="medium_confidence">درمیانی یقین</string>
     <string name="low_confidence">کم یقین</string>
 
+    <!-- ===================== کم یقین کی نشاندہی ===================== -->
+    <string name="finding_low_confidence">کم یقین: براہ کرم ڈینٹسٹ سے تصدیق کروائیں</string>
+    <string name="confidence_low_suffix">(کم)</string>
+
     <!-- ===================== اسکین حذف کریں ===================== -->
     <string name="delete_scan_title">یہ اسکین حذف کریں؟</string>
     <string name="delete_scan_message">اس سے اسکین اور اس کی تصاویر ہمیشہ کے لیے ہٹ جائیں گی۔ یہ عمل واپس نہیں ہو سکتا۔</string>

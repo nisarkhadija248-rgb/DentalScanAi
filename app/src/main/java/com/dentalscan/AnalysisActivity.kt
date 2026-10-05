@@ -9,6 +9,9 @@ import android.widget.TextView
 import androidx.lifecycle.lifecycleScope
 import com.dentalscan.data.AppDatabase
 import com.dentalscan.data.ScanEntity
+import com.dentalscan.ml.DetectionInput
+import com.dentalscan.ml.MouthFocus
+import com.dentalscan.ml.TeethGate
 import com.dentalscan.ml.TFLiteHelper
 import com.dentalscan.utils.ImageUtils
 import com.dentalscan.utils.LanguageManager
@@ -131,7 +134,7 @@ class AnalysisActivity : BaseActivity() {
     private var anglesTrusted = false
     private var allHits: List<Hit> = emptyList()      // every detection from every angle
     private var mergedHits: List<Hit> = emptyList()   // one per condition, worst first
-    private val angleBitmaps = HashMap<Int, Bitmap>() // annotated 640x640 image per angle
+    private val angleBitmaps = HashMap<Int, Bitmap>() // annotated photo (shrunk for the screen) per angle
     private var selectedAngle = 0
     private var angleSwitchEnabled = false            // false while the analysis is still running
     private class ThumbRef(val card: MaterialCardView, val strokeWidth: Int, val strokeColor: Int)
@@ -312,20 +315,44 @@ class AnalysisActivity : BaseActivity() {
                 val hits = mutableListOf<Hit>()
                 val annotated = HashMap<Int, Bitmap>()
                 var analysed = 0
+                // Finds where the mouth is, so eyes / skin / background are left out of the analysis.
+                // null (model file missing, or dummy mode) = analyse whole photos as before.
+                val gate = if (MouthFocus.ENABLED && !TFLiteHelper.DUMMY_MODE) {
+                    TeethGate.create(this@AnalysisActivity)
+                } else {
+                    null
+                }
+                try {
                 toAnalyse.forEachIndexed { n, angle ->
                     withContext(Dispatchers.Main) {
                         confidenceText.text =
                             getString(R.string.analysing_angle, n + 1, toAnalyse.size)
                     }
 
-                    val raw = BitmapFactory.decodeFile(anglePaths[angle]) ?: return@forEachIndexed
-                    val scaled = Bitmap.createScaledBitmap(raw, 640, 640, true)
+                    // The saved photo (up to 1280 px, its own shape) is what the detector looks at;
+                    // a smaller copy is only for showing on screen and drawing the boxes
+                    val source = BitmapFactory.decodeFile(anglePaths[angle]) ?: return@forEachIndexed
+                    val scaled = DetectionInput.scaleToMax(source, DISPLAY_MAX_SIDE)
 
                     // Show the photo being analysed so the scan line sweeps over it
                     withContext(Dispatchers.Main) { imageView.setImageBitmap(scaled) }
 
+                    // The part of the photo with teeth (null = whole photo)
+                    val region = try {
+                        gate?.let { MouthFocus.findRegion(it, scaled) }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        null
+                    }
+
                     val found = try {
-                        tfliteHelper?.detect(scaled) ?: emptyList()
+                        // Detect on the mouth area only (or the whole photo), at full sharpness,
+                        // then put the boxes back onto the full photo
+                        val target = if (region != null) MouthFocus.cut(source, region) else source
+                        val prepared = DetectionInput.prepare(target)
+                        val onTarget = (tfliteHelper?.detect(prepared.bitmap) ?: emptyList())
+                            .map { DetectionInput.toSource(it, prepared) }
+                        if (region != null) onTarget.map { MouthFocus.toFullPhoto(it, region) } else onTarget
                     } catch (e: Exception) {
                         e.printStackTrace()
                         return@forEachIndexed // one bad photo must not stop the others
@@ -333,7 +360,12 @@ class AnalysisActivity : BaseActivity() {
                     analysed++
 
                     found.forEach { hits += Hit(it, angle) }
-                    annotated[angle] = if (found.isEmpty()) scaled else ImageUtils.drawDetections(scaled, found)
+                    val drawn = if (found.isEmpty()) scaled else ImageUtils.drawDetections(scaled, found)
+                    // A dashed outline shows which area was analysed
+                    annotated[angle] = if (region != null) MouthFocus.withOutline(drawn, region) else drawn
+                }
+                } finally {
+                    gate?.close()
                 }
                 if (analysed == 0) throw IllegalStateException("No photo could be analysed")
 
@@ -563,13 +595,14 @@ class AnalysisActivity : BaseActivity() {
     }
 
     /**
-     * The photo of [angle] at 640x640 with the boxes of the detections found in it.
+     * The photo of [angle] (shrunk for the screen, its own shape) with the boxes of the detections found in it.
      * Used for saved scans, and for angles that were not analysed (dummy mode): then no boxes.
+     * Boxes are fractions of the whole photo, so this works for both old square photos and new ones.
      */
     private fun buildAngleBitmap(angle: Int): Bitmap? {
         val path = anglePaths.getOrNull(angle)?.takeIf { it.isNotEmpty() } ?: return null
         val raw = BitmapFactory.decodeFile(path) ?: return null
-        val scaled = Bitmap.createScaledBitmap(raw, 640, 640, true)
+        val scaled = DetectionInput.scaleToMax(raw, DISPLAY_MAX_SIDE)
         val found = allHits.filter { it.angle == angle }.map { it.detection }
         return if (found.isEmpty()) scaled else ImageUtils.drawDetections(scaled, found)
     }
@@ -900,6 +933,14 @@ class AnalysisActivity : BaseActivity() {
             row.findViewById<TextView>(R.id.condFoundIn).text =
                 getString(R.string.found_in, AngleNames.label(this, hit.angle, anglesTrusted))
 
+            // A weak finding is shown as such instead of looking like a firm result
+            row.findViewById<TextView>(R.id.condLowConfidence).apply {
+                if (hit.detection.confidence < LOW_CONFIDENCE) {
+                    text = getString(R.string.finding_low_confidence)
+                    visibility = View.VISIBLE
+                }
+            }
+
             row.setOnClickListener {
                 if (anglePaths.getOrNull(hit.angle).isNullOrEmpty()) return@setOnClickListener
                 selectAngle(hit.angle)
@@ -1093,7 +1134,9 @@ class AnalysisActivity : BaseActivity() {
         resultCard.setStrokeColor(ContextCompat.getColor(this, R.color.divider))
 
         resultText.text = ConditionStyle.displayName(condition, isUrdu)
-        confidenceText.text = if (isUrdu) "اعتماد: $confidencePct%" else "Confidence: $confidencePct%"
+        val lowSuffix = if (confidencePct < (LOW_CONFIDENCE * 100).toInt()) " ${getString(R.string.confidence_low_suffix)}" else ""
+        confidenceText.text =
+            (if (isUrdu) "اعتماد: $confidencePct%" else "Confidence: $confidencePct%") + lowSuffix
 
         conditionChip.text = if (isUrdu) ConditionStyle.displayName(condition, true) else ConditionStyle.shortName(condition)
         conditionChip.chipBackgroundColor = ColorStateList.valueOf(tint)
@@ -1309,6 +1352,12 @@ class AnalysisActivity : BaseActivity() {
     companion object {
         // Minimum time the scanning animation stays on screen (presentation only)
         private const val MIN_SCAN_MS = 1600L
+
+        // Longest side of the photo copy shown on screen (the detector uses the sharp saved photo)
+        private const val DISPLAY_MAX_SIDE = 960
+
+        // Findings below this confidence are labelled "low confidence"
+        private const val LOW_CONFIDENCE = 0.40f
 
         // Result animation timeline (milliseconds)
         private const val GAUGE_DELAY_MS = 150L

@@ -31,6 +31,10 @@
     <!-- Scan Result -->
     <string name="scan_result">Scan Result</string>
 
+    <!-- ===================== Low-confidence findings ===================== -->
+    <string name="finding_low_confidence">Low confidence: please verify with a dentist</string>
+    <string name="confidence_low_suffix">(low)</string>
+
     <!-- ===================== Delete a scan ===================== -->
     <string name="delete_scan_title">Delete this scan?</string>
     <string name="delete_scan_message">This removes the scan and its photos. This cannot be undone.</string>

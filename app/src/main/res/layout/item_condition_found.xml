@@ -60,6 +60,17 @@
             android:layout_marginTop="2dp"
             android:textAppearance="@style/TextAppearance.App.Caption"/>
 
+        <!-- Shown only for weak findings (confidence under 40%) -->
+        <TextView
+            android:id="@+id/condLowConfidence"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textAppearance="@style/TextAppearance.App.Caption"
+            android:textColor="@color/notice_fg"
+            android:textStyle="bold"
+            android:visibility="gone"/>
+
     </LinearLayout>
 
     <ImageView

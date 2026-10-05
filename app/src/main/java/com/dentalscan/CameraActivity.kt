@@ -18,6 +18,7 @@ import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.dentalscan.ml.GuidanceAnalyzer
+import com.dentalscan.ml.TeethGate
 import com.dentalscan.ml.TFLiteHelper
 import com.dentalscan.utils.ImageCompressor
 import com.dentalscan.utils.LanguageManager
@@ -49,6 +50,7 @@ class CameraActivity : BaseActivity() {
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
     private var camera: Camera? = null
+    private var teethGate: TeethGate? = null
 
     // ── Wizard State ───────────────────────────────────
     private var currentStep = 1
@@ -348,7 +350,8 @@ class CameraActivity : BaseActivity() {
                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                 .build()
                 .also {
-                    it.setAnalyzer(cameraExecutor, GuidanceAnalyzer { result ->
+                    teethGate = TeethGate.create(this)
+                    it.setAnalyzer(cameraExecutor, GuidanceAnalyzer(teethGate) { result ->
                         runOnUiThread { updateGuidanceFromResult(result) }
                     })
                 }
@@ -382,25 +385,26 @@ class CameraActivity : BaseActivity() {
     private fun updateGuidanceFromResult(result: GuidanceAnalyzer.GuidanceResult) {
         val isUrdu = LanguageManager.isUrdu(this)
 
+        // Light and focus first (they decide whether the photo is usable), then whether teeth are in view
         val state = when {
-            !result.hasTeeth -> "position_teeth"
             result.isTooDark -> "too_dark"
             result.isTooBlurry -> "too_blurry"
+            !result.hasTeeth -> "position_teeth"
             result.isTooFar -> "move_closer"
-            result.teethConfidence > 0.7 -> "good"
-            else -> "position_teeth"
+            else -> "good"
         }
 
         updateGuidanceText(isUrdu, state)
 
         // In DUMMY_MODE guidance is bypassed — button stays enabled
         if (!TFLiteHelper.DUMMY_MODE) {
-            captureButton.isEnabled = result.teethConfidence > 0.7
-                    && !result.isTooDark
-                    && !result.isTooBlurry
+            // The teeth check is only a hint (green frame and "Perfect!"): the classifier is not perfect,
+            // so it never blocks Capture. Only a dark or blurry frame does.
+            captureButton.isEnabled = !result.isTooDark && !result.isTooBlurry
 
-            setGuidanceReady(captureButton.isEnabled)
-            guideFrame.isActivated = captureButton.isEnabled
+            val ready = captureButton.isEnabled && result.hasTeeth
+            setGuidanceReady(ready)
+            guideFrame.isActivated = ready
         }
     }
 
@@ -480,6 +484,7 @@ class CameraActivity : BaseActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
+        teethGate?.close()
     }
 
     companion object {

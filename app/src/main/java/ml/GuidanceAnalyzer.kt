@@ -1,5 +1,7 @@
 package com.dentalscan.ml
 
+import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.os.SystemClock
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
@@ -19,7 +21,11 @@ import androidx.camera.core.ImageProxy
  * The thresholds below were chosen without testing on the phone. If the Capture button stays
  * disabled in good conditions, lower them (or set ENFORCE_BLUR_CHECK / ENFORCE_TEETH_CHECK to false).
  */
-class GuidanceAnalyzer(private val listener: (GuidanceResult) -> Unit) : ImageAnalysis.Analyzer {
+class GuidanceAnalyzer(
+    /** The teeth classifier. Null (model file missing) = fall back to the rough colour check. */
+    private val gate: TeethGate?,
+    private val listener: (GuidanceResult) -> Unit
+) : ImageAnalysis.Analyzer {
 
     data class GuidanceResult(
         val hasTeeth: Boolean = true,
@@ -47,12 +53,16 @@ class GuidanceAnalyzer(private val listener: (GuidanceResult) -> Unit) : ImageAn
         private const val ENFORCE_TEETH_CHECK = true
 
         private const val SMOOTHING = 0.4f // weight of the newest frame
+
+        // Teeth classifier: the middle 80% x 60% of the (upright) frame is scored; this score or more = teeth
+        private const val MODEL_TEETH_SCORE = 0.6f
     }
 
     private var lastRun = 0L
     private var avgLuma = -1f
     private var avgSharp = -1f
     private var avgRatio = -1f
+    private var avgModel = -1f
 
     override fun analyze(imageProxy: ImageProxy) {
         try {
@@ -149,6 +159,19 @@ class GuidanceAnalyzer(private val listener: (GuidanceResult) -> Unit) : ImageAn
 
         val dark = avgLuma < DARK_LUMA
         val blurry = ENFORCE_BLUR_CHECK && avgSharp < BLUR_VARIANCE
+
+        // Teeth: the classifier on the middle of the frame, or the colour check if there is no model
+        val modelScore = gate?.let { scoreFrame(it, image) }
+        if (modelScore != null) {
+            avgModel = smooth(avgModel, modelScore)
+            return GuidanceResult(
+                hasTeeth = avgModel >= MODEL_TEETH_SCORE,
+                teethConfidence = avgModel,
+                isTooDark = dark,
+                isTooBlurry = blurry
+            )
+        }
+
         val hasTeeth = !ENFORCE_TEETH_CHECK || avgRatio >= HAS_TEETH_RATIO
         val confidence = if (ENFORCE_TEETH_CHECK) (avgRatio / FULL_CONFIDENCE_RATIO).coerceIn(0f, 1f) else 1f
 
@@ -160,5 +183,20 @@ class GuidanceAnalyzer(private val listener: (GuidanceResult) -> Unit) : ImageAn
             // Teeth are visible but small in the frame: ask the user to come closer
             isTooFar = hasTeeth && ENFORCE_TEETH_CHECK && confidence <= 0.7f
         )
+    }
+
+    /** Teeth probability for the middle of the upright camera frame. */
+    private fun scoreFrame(gate: TeethGate, image: ImageProxy): Float {
+        val frame = image.toBitmap()
+        val rotation = image.imageInfo.rotationDegrees
+        val upright = if (rotation != 0) {
+            Bitmap.createBitmap(
+                frame, 0, 0, frame.width, frame.height,
+                Matrix().apply { postRotate(rotation.toFloat()) }, true
+            )
+        } else {
+            frame
+        }
+        return gate.scoreRegion(upright, 0.1f, 0.2f, 0.9f, 0.8f)
     }
 }
