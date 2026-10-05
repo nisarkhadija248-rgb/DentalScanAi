@@ -6,6 +6,7 @@ import android.graphics.Paint
 import android.graphics.RectF
 import android.graphics.Typeface
 import com.dentalscan.ml.TFLiteHelper
+import kotlin.math.max
 
 object ImageUtils {
 
@@ -31,34 +32,64 @@ object ImageUtils {
 
         val padX = 12f
         val padY = 8f
+        val metrics = textPaint.fontMetrics
+        val textHeight = metrics.descent - metrics.ascent
+        val pillHeight = textHeight + padY * 2
+        val imageW = mutableBitmap.width.toFloat()
+        val imageH = mutableBitmap.height.toFloat()
 
-        detections.forEach { detection ->
-            val boxColor = ConditionStyle.paintColor(detection.className)
-            paint.color = boxColor
+        // Strongest findings first, so they get the best label position
+        val ordered = detections.sortedByDescending { it.confidence }
 
-            val rect = RectF(
-                detection.boundingBox.left * mutableBitmap.width,
-                detection.boundingBox.top * mutableBitmap.height,
-                detection.boundingBox.right * mutableBitmap.width,
-                detection.boundingBox.bottom * mutableBitmap.height
+        // 1. All boxes
+        val boxes = ordered.map { d ->
+            RectF(
+                d.boundingBox.left * imageW, d.boundingBox.top * imageH,
+                d.boundingBox.right * imageW, d.boundingBox.bottom * imageH
             )
-            canvas.drawRoundRect(rect, 8f, 8f, paint)
+        }
+        ordered.forEachIndexed { i, d ->
+            paint.color = ConditionStyle.paintColor(d.className)
+            canvas.drawRoundRect(boxes[i], 8f, 8f, paint)
+        }
 
-            // Label on a filled pill in the same color as the box
-            val label = "${ConditionStyle.shortName(detection.className)} ${(detection.confidence * 100).toInt()}%"
-            val metrics = textPaint.fontMetrics
-            val textHeight = metrics.descent - metrics.ascent
+        // 2. Labels on filled pills in the box colour, placed so they do not cover each other
+        val placed = ArrayList<RectF>()
+        ordered.forEachIndexed { i, d ->
+            val rect = boxes[i]
+            val label = "${ConditionStyle.shortName(d.className)} ${(d.confidence * 100).toInt()}%"
             val pillWidth = textPaint.measureText(label) + padX * 2
-            val pillHeight = textHeight + padY * 2
 
-            // Sit above the box; drop inside it if there is no room at the top of the image
-            val pillTop = if (rect.top - pillHeight >= 0f) rect.top - pillHeight else rect.top
-            val pillRect = RectF(rect.left, pillTop, rect.left + pillWidth, pillTop + pillHeight)
+            // Keep the pill inside the picture horizontally
+            val left = rect.left.coerceIn(0f, max(0f, imageW - pillWidth))
 
-            pillPaint.color = boxColor
+            // Try: above the box, below it, then stacked further above / below until one is free
+            val tops = ArrayList<Float>()
+            tops += rect.top - pillHeight
+            tops += rect.bottom
+            for (k in 1..4) {
+                tops += rect.top - pillHeight * (k + 1)
+                tops += rect.bottom + pillHeight * k
+            }
+            var chosen: RectF? = null
+            for (top in tops) {
+                if (top < 0f || top + pillHeight > imageH) continue
+                val candidate = RectF(left, top, left + pillWidth, top + pillHeight)
+                if (placed.none { RectF.intersects(it, candidate) }) {
+                    chosen = candidate
+                    break
+                }
+            }
+            // No free spot: sit at the top of the box (the old behaviour)
+            val pillRect = chosen ?: RectF(
+                left, rect.top.coerceIn(0f, max(0f, imageH - pillHeight)),
+                left + pillWidth, rect.top.coerceIn(0f, max(0f, imageH - pillHeight)) + pillHeight
+            )
+            placed += pillRect
+
+            pillPaint.color = ConditionStyle.paintColor(d.className)
             canvas.drawRoundRect(pillRect, 10f, 10f, pillPaint)
-
-            textPaint.color = ConditionStyle.paintTextColor(detection.className)
+            textPaint.color = ConditionStyle.paintTextColor(d.className)
             canvas.drawText(label, pillRect.left + padX, pillRect.top + padY - metrics.ascent, textPaint)
         }
 

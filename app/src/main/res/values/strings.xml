@@ -41,7 +41,10 @@
     <string name="delete_scan_confirm">Delete</string>
     <string name="delete_scan_cancel">Cancel</string>
     <string name="delete_scan_done">Scan deleted</string>
-    <string name="history_hold_hint">Hold a scan to delete it</string>
+    <string name="history_hold_hint">Hold a scan for options</string>
+    <string name="scan_option_reanalyse">Re-analyse with the current model</string>
+    <string name="scan_option_delete">Delete scan</string>
+    <string name="scan_reanalyse_note">Re-analysing the saved photos with the current model. Nothing is saved.</string>
 
     <!-- ===================== Smart reminders ===================== -->
     <string name="smart_option">Smart (Recommended)</string>

@@ -281,6 +281,13 @@ class AnalysisActivity : BaseActivity() {
             }
 
         } else {
+            // Re-analysis of a saved scan (from History): run the current model again, never save it,
+            // because the photos belong to the original scan
+            if (intent.getBooleanExtra("reanalyse", false)) {
+                saveButton.visibility = View.GONE
+                android.widget.Toast.makeText(this, R.string.scan_reanalyse_note, android.widget.Toast.LENGTH_LONG).show()
+            }
+
             // Save is only possible once the result is in (otherwise an empty result would look healthy)
             saveButton.isEnabled = false
             startScanAnimation()

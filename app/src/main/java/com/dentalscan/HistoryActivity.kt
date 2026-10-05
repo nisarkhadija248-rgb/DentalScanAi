@@ -123,7 +123,7 @@ class HistoryActivity : BaseActivity() {
                         intent.putExtra("checked_steps", scan.checkedSteps)
                         startActivity(intent)
                     },
-                    onItemLongClick = { scan -> confirmDelete(scan) }
+                    onItemLongClick = { scan -> showScanOptions(scan) }
                 )
                 adapter.submitList(scans)
                 recyclerView.adapter = adapter
@@ -133,6 +133,28 @@ class HistoryActivity : BaseActivity() {
                 showRisk(scans)
             }
         }
+    }
+
+    /** Hold a scan: re-run the current model on its saved photos, or delete it. */
+    private fun showScanOptions(scan: com.dentalscan.data.ScanEntity) {
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setItems(
+                arrayOf(
+                    getString(R.string.scan_option_reanalyse),
+                    getString(R.string.scan_option_delete)
+                )
+            ) { _, which ->
+                if (which == 0) {
+                    // Opens the normal analysis on the saved photos. Nothing is saved from it.
+                    val intent = Intent(this, AnalysisActivity::class.java)
+                    intent.putExtra("image_path", scan.imagePath)
+                    intent.putExtra("reanalyse", true)
+                    startActivity(intent)
+                } else {
+                    confirmDelete(scan)
+                }
+            }
+            .show()
     }
 
     /** Asks first, then deletes the scan and its photo files. */

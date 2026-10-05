@@ -28,7 +28,10 @@
     <string name="delete_scan_confirm">حذف کریں</string>
     <string name="delete_scan_cancel">منسوخ کریں</string>
     <string name="delete_scan_done">اسکین حذف ہو گیا</string>
-    <string name="history_hold_hint">حذف کرنے کے لیے اسکین کو دبائے رکھیں</string>
+    <string name="history_hold_hint">اختیارات کے لیے اسکین کو دبائے رکھیں</string>
+    <string name="scan_option_reanalyse">موجودہ ماڈل سے دوبارہ تجزیہ کریں</string>
+    <string name="scan_option_delete">اسکین حذف کریں</string>
+    <string name="scan_reanalyse_note">محفوظ تصاویر کا موجودہ ماڈل سے دوبارہ تجزیہ ہو رہا ہے۔ کچھ محفوظ نہیں ہوگا۔</string>
 
     <!-- ===================== اسمارٹ یاددہانی ===================== -->
     <string name="smart_option">اسمارٹ (تجویز کردہ)</string>
