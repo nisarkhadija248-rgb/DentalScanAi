@@ -210,6 +210,7 @@ class AnalysisActivity : BaseActivity() {
 
         val isUrdu = LanguageManager.isUrdu(this)
         setupLegend(isUrdu)
+        findViewById<TextView>(R.id.zoomViewHint).text = getString(R.string.zoom_view_hint)
         setupPhotos(isUrdu)
         resultText.text = if (isUrdu) "تجزیہ ہو رہا ہے ..." else "Analyzing..."
         confidenceText.text = if (isUrdu) "براہ کرم انتظار کریں" else "Please wait"
@@ -617,11 +618,13 @@ class AnalysisActivity : BaseActivity() {
     private fun showPhotoDialog(path: String, title: String, isUrdu: Boolean) {
         lifecycleScope.launch {
             val bmp = withContext(Dispatchers.IO) { PhotoLoader.decodeSampled(path, 1024) } ?: return@launch
-            val view = ImageView(this@AnalysisActivity).apply {
+            // Zoomable too: pinch or double-tap. A fixed height gives the picture room to be moved around.
+            val view = ZoomableImageView(this@AnalysisActivity).apply {
                 setImageBitmap(bmp)
-                adjustViewBounds = true
-                scaleType = ImageView.ScaleType.FIT_CENTER
-                setPadding(dp(12), dp(8), dp(12), dp(8))
+                layoutParams = android.view.ViewGroup.LayoutParams(
+                    android.view.ViewGroup.LayoutParams.MATCH_PARENT,
+                    (resources.displayMetrics.heightPixels * 0.6f).toInt()
+                )
             }
             androidx.appcompat.app.AlertDialog.Builder(this@AnalysisActivity)
                 .setTitle(title)

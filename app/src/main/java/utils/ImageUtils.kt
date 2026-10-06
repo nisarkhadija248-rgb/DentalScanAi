@@ -90,10 +90,15 @@ object ImageUtils {
         return mutableBitmap
     }
 
+    /**
+     * Severity from the detector's confidence, as in the thesis (section 4.8.6):
+     * below 50% = Low, 50% to 75% = Medium, above 75% = High.
+     * The health score, risk level, action plan and reminders all use this one function.
+     */
     fun getSeverityText(confidence: Float): String {
         return when {
-            confidence > 0.8f -> "High"
-            confidence > 0.6f -> "Medium"
+            confidence > 0.75f -> "High"
+            confidence >= 0.50f -> "Medium"
             else -> "Low"
         }
     }

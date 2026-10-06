@@ -29,14 +29,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content">
 
-                    <ImageView
+                    <!-- Pinch or double-tap to zoom, drag to move when zoomed (see ZoomableImageView) -->
+                    <com.dentalscan.ZoomableImageView
                         android:id="@+id/resultImageView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:adjustViewBounds="true"
                         android:maxHeight="400dp"
-                        android:minHeight="200dp"
-                        android:scaleType="fitCenter"/>
+                        android:minHeight="200dp"/>
 
                     <!-- Scanning animation overlay (only shown while analysing) -->
                     <FrameLayout
@@ -125,6 +125,14 @@
                     android:textAppearance="@style/TextAppearance.App.Caption"/>
 
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/zoomViewHint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:gravity="center"
+                android:textAppearance="@style/TextAppearance.App.Caption"/>
 
             <!-- Captured photos: scrollable thumbnail row (tap to enlarge) -->
             <LinearLayout

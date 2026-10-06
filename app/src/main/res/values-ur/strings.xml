@@ -18,6 +18,15 @@
     <string name="medium_confidence">درمیانی یقین</string>
     <string name="low_confidence">کم یقین</string>
 
+    <!-- ===================== نتیجے کی تصویر زوم ===================== -->
+    <string name="zoom_view_hint">زوم کرنے کے لیے تصویر کو انگلیوں سے پھیلائیں یا دو بار ٹیپ کریں</string>
+
+    <!-- ===================== کیمرا زوم ===================== -->
+    <string name="zoom_hint">مشورہ: زوم کریں تاکہ فریم میں صرف آپ کا منہ نظر آئے</string>
+    <string name="zoom_in_desc">زوم ان</string>
+    <string name="zoom_out_desc">زوم آؤٹ</string>
+    <string name="zoom_slider_desc">زوم</string>
+
     <!-- ===================== کم یقین کی نشاندہی ===================== -->
     <string name="finding_low_confidence">کم یقین: براہ کرم ڈینٹسٹ سے تصدیق کروائیں</string>
     <string name="confidence_low_suffix">(کم)</string>

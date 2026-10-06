@@ -9,7 +9,12 @@ import android.content.res.ColorStateList
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.view.ScaleGestureDetector
 import android.widget.ProgressBar
+import android.widget.SeekBar
+import kotlin.math.ln
+import kotlin.math.pow
+import kotlin.math.roundToInt
 import android.widget.TextView
 import android.widget.Toast
 import androidx.camera.core.*
@@ -45,6 +50,15 @@ class CameraActivity : BaseActivity() {
     private lateinit var guideFrame: View
     private lateinit var flashButton: ImageView
     private lateinit var cameraMuteButton: ImageView
+
+    // ── Zoom ───────────────────────────────────────────
+    private lateinit var zoomSeek: SeekBar
+    private lateinit var zoomText: TextView
+    private lateinit var zoomHint: TextView
+    private lateinit var scaleDetector: ScaleGestureDetector
+    private var zoomMin = 1f
+    private var zoomMax = 1f
+    private var updatingZoomUi = false
 
     // ── Camera ─────────────────────────────────────────
     private var imageCapture: ImageCapture? = null
@@ -159,11 +173,68 @@ class CameraActivity : BaseActivity() {
         cameraMuteButton = findViewById(R.id.cameraMuteButton)
 
         VoiceFeedback.attachMuteButton(cameraMuteButton)
+
+        // Zoom: slider, plus / minus, and pinching the preview
+        zoomSeek = findViewById(R.id.zoomSeek)
+        zoomText = findViewById(R.id.zoomText)
+        zoomHint = findViewById(R.id.zoomHint)
+        zoomHint.text = getString(R.string.zoom_hint)
+        findViewById<ImageView>(R.id.zoomPlus).setOnClickListener { setZoom(currentZoom() * 1.25f) }
+        findViewById<ImageView>(R.id.zoomMinus).setOnClickListener { setZoom(currentZoom() / 1.25f) }
+        zoomSeek.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser && !updatingZoomUi) setZoom(ratioFromProgress(progress))
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+        scaleDetector = ScaleGestureDetector(this, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                setZoom(currentZoom() * detector.scaleFactor)
+                return true
+            }
+        })
+        viewFinder.setOnTouchListener { _, event ->
+            scaleDetector.onTouchEvent(event)
+            true
+        }
         flashButton.setOnClickListener {
             // The icon follows the real torch state (see observeTorch), so a failure can't leave it wrong
             val cam = camera ?: return@setOnClickListener
             val turnOn = cam.cameraInfo.torchState.value != TorchState.ON
             cam.cameraControl.enableTorch(turnOn)
+        }
+    }
+
+    // ── Zoom ───────────────────────────────────────────
+
+    private fun currentZoom(): Float = camera?.cameraInfo?.zoomState?.value?.zoomRatio ?: 1f
+
+    /** Zooms the live preview AND the photo that is taken (the saved picture is zoomed in too). */
+    private fun setZoom(ratio: Float) {
+        val cam = camera ?: return
+        cam.cameraControl.setZoomRatio(ratio.coerceIn(zoomMin, zoomMax))
+    }
+
+    // The slider is logarithmic, so each part of it feels like the same amount of zoom
+    private fun ratioFromProgress(progress: Int): Float =
+        if (zoomMax <= zoomMin) zoomMin else zoomMin * (zoomMax / zoomMin).pow(progress / 100f)
+
+    private fun progressFromRatio(ratio: Float): Int =
+        if (zoomMax <= zoomMin) 0
+        else (100f * ln(ratio / zoomMin) / ln(zoomMax / zoomMin)).roundToInt().coerceIn(0, 100)
+
+    /** Keeps the slider, the "1.0x" text and the tip in step with the real zoom of the camera. */
+    private fun observeZoom(cam: Camera) {
+        cam.cameraInfo.zoomState.observe(this) { state ->
+            zoomMin = state.minZoomRatio
+            zoomMax = minOf(state.maxZoomRatio, MAX_ZOOM)
+            updatingZoomUi = true
+            zoomSeek.progress = progressFromRatio(state.zoomRatio)
+            updatingZoomUi = false
+            zoomText.text = String.format(java.util.Locale.US, "%.1fx", state.zoomRatio)
+            // The tip is only useful while the camera is not zoomed in
+            zoomHint.visibility = if (state.zoomRatio < 1.5f) View.VISIBLE else View.INVISIBLE
         }
     }
 
@@ -362,7 +433,10 @@ class CameraActivity : BaseActivity() {
                     this, CameraSelector.DEFAULT_BACK_CAMERA,
                     preview, imageCapture, imageAnalyzer
                 )
-                camera?.let { observeTorch(it) }
+                camera?.let {
+                    observeTorch(it)
+                    observeZoom(it)
+                }
             } catch (exc: Exception) {
                 Toast.makeText(this, "Camera failed", Toast.LENGTH_SHORT).show()
             }
@@ -488,6 +562,9 @@ class CameraActivity : BaseActivity() {
     }
 
     companion object {
+        // Zoom is limited to this (beyond it the picture is just blown-up pixels)
+        private const val MAX_ZOOM = 4f
+
         private const val REQUEST_CODE_PERMISSIONS = 10
         private val REQUIRED_PERMISSIONS = mutableListOf(
             Manifest.permission.CAMERA,

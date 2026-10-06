@@ -31,6 +31,15 @@
     <!-- Scan Result -->
     <string name="scan_result">Scan Result</string>
 
+    <!-- ===================== Zoom the result photo ===================== -->
+    <string name="zoom_view_hint">Pinch or double-tap the photo to zoom in</string>
+
+    <!-- ===================== Camera zoom ===================== -->
+    <string name="zoom_hint">Tip: zoom in so only your mouth fills the frame</string>
+    <string name="zoom_in_desc">Zoom in</string>
+    <string name="zoom_out_desc">Zoom out</string>
+    <string name="zoom_slider_desc">Zoom</string>
+
     <!-- ===================== Low-confidence findings ===================== -->
     <string name="finding_low_confidence">Low confidence: please verify with a dentist</string>
     <string name="confidence_low_suffix">(low)</string>
