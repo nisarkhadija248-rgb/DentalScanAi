@@ -77,6 +77,27 @@ object MouthFocus {
         return if (region.area >= MAX_AREA) null else region
     }
 
+    /**
+     * Grows [region] (fractions of the photo) so that its shape matches the photo's own shape
+     * (for example 3:4), keeping the same centre. The detector squashes whatever it is given to a
+     * square, and its training photos were squashed from photos of that shape, so a crop with the
+     * same shape is squashed the same way and the teeth do not look stretched.
+     */
+    fun matchAspect(region: Region, imageW: Int, imageH: Int): Region {
+        val target = imageW.toFloat() / imageH
+        var w = region.width * imageW
+        var h = region.height * imageH
+        if (w / h > target) h = w / target else w = h * target
+        if (w > imageW) { w = imageW.toFloat(); h = w / target }
+        if (h > imageH) { h = imageH.toFloat(); w = h * target }
+
+        val cx = (region.left + region.right) / 2f * imageW
+        val cy = (region.top + region.bottom) / 2f * imageH
+        val left = (cx - w / 2f).coerceIn(0f, max(0f, imageW - w))
+        val top = (cy - h / 2f).coerceIn(0f, max(0f, imageH - h))
+        return Region(left / imageW, top / imageH, (left + w) / imageW, (top + h) / imageH)
+    }
+
     /** The region cut out of [image] at the image's own resolution (not resized). */
     fun cut(image: Bitmap, region: Region): Bitmap {
         val x = (region.left * image.width).toInt().coerceIn(0, image.width - 1)

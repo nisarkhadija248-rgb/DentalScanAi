@@ -141,6 +141,12 @@ class AnalysisActivity : BaseActivity() {
     private val thumbRefs = HashMap<Int, ThumbRef>()
     private val conditionGaugeAnimators = mutableListOf<ValueAnimator>()
 
+    // Analysing only a zoomed-in area of one photo
+    private val regionByAngle = HashMap<Int, MouthFocus.Region>() // angles whose result comes from an area
+    private var regionBusy = false
+    private var reanalyseMode = false   // opened from History with "Re-analyse": can update the saved scan
+    private var resultsChanged = false  // an area was analysed and the new result is not saved yet
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_analysis)
@@ -219,6 +225,13 @@ class AnalysisActivity : BaseActivity() {
         retakeButton.setOnClickListener { finish() }
         VoiceFeedback.attachMuteButton(findViewById(R.id.resultMuteButton))
 
+        // Zoom into the teeth on the photo, then analyse just that area
+        findViewById<Button>(R.id.analyseAreaButton).setText(R.string.analyse_area)
+        findViewById<Button>(R.id.wholePhotoButton).setText(R.string.analyse_whole_photo)
+        findViewById<Button>(R.id.analyseAreaButton).setOnClickListener { analyseSelectedArea(wholePhoto = false) }
+        findViewById<Button>(R.id.wholePhotoButton).setOnClickListener { analyseSelectedArea(wholePhoto = true) }
+        zoomView()?.onZoomChanged = { updateRegionBar() }
+
         val isViewOnly = intent.getBooleanExtra("view_only", false)
         isViewOnlyMode = isViewOnly
 
@@ -244,6 +257,7 @@ class AnalysisActivity : BaseActivity() {
                 angleSwitchEnabled = true
                 showHealthyState(isUrdu)
                 selectAngle(selectedAngle)
+                updateRegionBar()
                 return
             }
 
@@ -256,6 +270,7 @@ class AnalysisActivity : BaseActivity() {
                 mergedHits = listOf(Hit(TFLiteHelper.Detection(0, condition, confidence, RectF()), 0))
             }
             angleSwitchEnabled = true
+            updateRegionBar()
 
             showResultUi(condition, (confidence * 100).toInt(), severity, isUrdu)
             showConditions(mergedHits, isUrdu)
@@ -282,10 +297,17 @@ class AnalysisActivity : BaseActivity() {
             }
 
         } else {
-            // Re-analysis of a saved scan (from History): run the current model again, never save it,
-            // because the photos belong to the original scan
-            if (intent.getBooleanExtra("reanalyse", false)) {
-                saveButton.visibility = View.GONE
+            // Re-analysis of a saved scan (from History): the current model runs again on its photos.
+            // Nothing changes unless the user taps "Update saved scan" (then the scan's analysis is replaced).
+            reanalyseMode = intent.getBooleanExtra("reanalyse", false)
+            if (reanalyseMode) {
+                currentScanId = intent.getLongExtra("scan_id", -1L)
+                if (currentScanId > 0L) {
+                    saveButton.setText(R.string.update_saved_scan)
+                    retakeButton.visibility = View.GONE
+                } else {
+                    saveButton.visibility = View.GONE
+                }
                 android.widget.Toast.makeText(this, R.string.scan_reanalyse_note, android.widget.Toast.LENGTH_LONG).show()
             }
 
@@ -403,6 +425,7 @@ class AnalysisActivity : BaseActivity() {
                     imageView.setImageBitmap(annotated[selectedAngle])
                     angleSwitchEnabled = true
                     saveButton.isEnabled = true
+                    updateRegionBar()
 
                     displayResults(primaryDetection)
                 }
@@ -592,6 +615,7 @@ class AnalysisActivity : BaseActivity() {
         if (!angleSwitchEnabled) return
         selectedAngle = angle
         updateThumbSelection()
+        updateRegionBar()
         lifecycleScope.launch {
             val bmp = angleBitmaps[angle] ?: withContext(Dispatchers.IO) { buildAngleBitmap(angle) }
             // The user may have tapped another angle while this one was loading
@@ -842,7 +866,8 @@ class AnalysisActivity : BaseActivity() {
      * scan when Save Scan is tapped (see saveScan).
      */
     private fun persistChecklist() {
-        if (!isViewOnlyMode || currentScanId <= 0L) return
+        // While a new area result is waiting to be saved, the ticks go in with it (updateSavedScan)
+        if (!isViewOnlyMode || currentScanId <= 0L || resultsChanged) return
         val encoded = ActionPlanBuilder.encodeChecked(checkedSteps)
         val scanId = currentScanId
         // NonCancellable: still finish the write if the user leaves the screen right after ticking
@@ -1197,6 +1222,12 @@ class AnalysisActivity : BaseActivity() {
         if (!angleSwitchEnabled || !saveButton.isEnabled) return
         saveButton.isEnabled = false // no double saves
 
+        // A saved scan that was analysed again: replace its analysis instead of adding a new scan
+        if (currentScanId > 0L && (isViewOnlyMode || reanalyseMode)) {
+            updateSavedScan()
+            return
+        }
+
         // null = nothing detected in any angle: saved as a healthy scan
         val detection = currentDetections.maxByOrNull { it.confidence }
         val isUrdu = LanguageManager.isUrdu(this)
@@ -1227,9 +1258,16 @@ class AnalysisActivity : BaseActivity() {
             val earlierScans = HealthScore.scansFor(this@AnalysisActivity)
             val previousScore = HealthScore.compute(earlierScans)
 
+            // Photos analysed by area are saved cropped to that area
+            val cropped = cropSavedPhotos()
+            val toSave = if (cropped.replaced.isEmpty()) scan else scan.copy(
+                imagePath = JSONArray(cropped.paths).toString(),
+                boundingBoxes = detectionsToJson(cropped.hits)
+            )
             val newId = AppDatabase.getDatabase(this@AnalysisActivity)
                 .scanDao()
-                .insertScan(scan)
+                .insertScan(toSave)
+            cropped.replaced.forEach { File(it).delete() } // the uncropped originals
 
             // Score after this scan, saved to the profile
             val scansNow = earlierScans + scan.copy(id = newId)
@@ -1249,6 +1287,200 @@ class AnalysisActivity : BaseActivity() {
                 } else {
                     finish()
                 }
+            }
+        }
+    }
+
+    // ---------- Analyse only a zoomed-in area ----------
+
+    private fun zoomView(): ZoomableImageView? = imageView as? ZoomableImageView
+
+    /** "Analyse this area" while zoomed in; "Whole photo" while the shown result comes from an area. */
+    private fun updateRegionBar() {
+        val zoomed = zoomView()?.isZoomedIn() == true
+        val hasArea = regionByAngle.containsKey(selectedAngle)
+        val usable = angleSwitchEnabled && !anglePaths.getOrNull(selectedAngle).isNullOrEmpty()
+
+        findViewById<Button>(R.id.analyseAreaButton).apply {
+            visibility = if (zoomed) View.VISIBLE else View.GONE
+            isEnabled = !regionBusy
+        }
+        findViewById<Button>(R.id.wholePhotoButton).apply {
+            visibility = if (hasArea) View.VISIBLE else View.GONE
+            isEnabled = !regionBusy
+        }
+        findViewById<View>(R.id.regionBar).visibility =
+            if (usable && (zoomed || hasArea)) View.VISIBLE else View.GONE
+    }
+
+    /**
+     * Runs the detector again on the part of the selected photo that is on screen (or, with
+     * [wholePhoto], on the whole photo), at the sharpness of the saved photo. The boxes found replace
+     * the ones of that photo; the other photos keep theirs.
+     */
+    private fun analyseSelectedArea(wholePhoto: Boolean) {
+        if (regionBusy || !angleSwitchEnabled) return
+        val angle = selectedAngle
+        val path = anglePaths.getOrNull(angle)?.takeIf { it.isNotEmpty() && File(it).exists() } ?: return
+        val view = zoomView() ?: return
+
+        val region: MouthFocus.Region? = if (wholePhoto) {
+            null
+        } else {
+            val visible = view.visibleRegion() ?: return
+            val shown = view.drawable ?: return
+            MouthFocus.matchAspect(
+                MouthFocus.Region(visible.left, visible.top, visible.right, visible.bottom),
+                shown.intrinsicWidth,
+                shown.intrinsicHeight
+            )
+        }
+
+        regionBusy = true
+        val saveWasEnabled = saveButton.isEnabled
+        saveButton.isEnabled = false
+        loadingIndicator.visibility = View.VISIBLE
+        startScanAnimation()
+        updateRegionBar()
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val helper = tfliteHelper ?: TFLiteHelper(this@AnalysisActivity).also { tfliteHelper = it }
+                val source = BitmapFactory.decodeFile(path) ?: throw IllegalStateException("Photo not readable")
+                val scaled = DetectionInput.scaleToMax(source, DISPLAY_MAX_SIDE)
+
+                val target = if (region != null) MouthFocus.cut(source, region) else source
+                val prepared = DetectionInput.prepare(target)
+                val onTarget = helper.detect(prepared.bitmap).map { DetectionInput.toSource(it, prepared) }
+                val found = if (region != null) onTarget.map { MouthFocus.toFullPhoto(it, region) } else onTarget
+
+                val drawn = if (found.isEmpty()) scaled else ImageUtils.drawDetections(scaled, found)
+                val shownBitmap = if (region != null) MouthFocus.withOutline(drawn, region) else drawn
+
+                withContext(Dispatchers.Main) { applyAreaResult(angle, region, found, shownBitmap) }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    regionBusy = false
+                    hideLoading()
+                    saveButton.isEnabled = saveWasEnabled
+                    updateRegionBar()
+                    android.widget.Toast.makeText(
+                        this@AnalysisActivity, R.string.area_analysis_failed, android.widget.Toast.LENGTH_LONG
+                    ).show()
+                }
+            }
+        }
+    }
+
+    /** Puts the result of an area analysis in place of that photo's earlier boxes and refreshes the screen. */
+    private fun applyAreaResult(
+        angle: Int,
+        region: MouthFocus.Region?,
+        found: List<TFLiteHelper.Detection>,
+        shownBitmap: Bitmap
+    ) {
+        regionBusy = false
+        if (region != null) regionByAngle[angle] = region else regionByAngle.remove(angle)
+
+        allHits = allHits.filter { it.angle != angle } + found.map { Hit(it, angle) }
+        mergedHits = mergeHits(allHits)
+        currentDetections = mergedHits.map { it.detection }
+        angleBitmaps[angle] = shownBitmap
+        resultsChanged = true
+        if (selectedAngle == angle) imageView.setImageBitmap(shownBitmap)
+
+        // A saved scan opened from History can now be updated
+        if (isViewOnlyMode && currentScanId > 0L) {
+            saveButton.setText(R.string.update_saved_scan)
+            saveButton.visibility = View.VISIBLE
+        }
+        saveButton.isEnabled = true
+
+        // The plan was made for the old result: start again from the new one
+        checkedSteps.clear()
+        actionPlanCard.visibility = View.GONE
+        conditionInfoCard.visibility = View.GONE
+        tipsSection.visibility = View.GONE
+        displayResults(mergedHits.firstOrNull()?.detection)
+        updateRegionBar()
+    }
+
+    private class Cropped(val paths: List<String>, val hits: List<Hit>, val replaced: List<String>)
+
+    /**
+     * For every photo that was analysed by area: cuts the saved photo down to that area (full sharpness,
+     * written as a new file) and converts its boxes to fractions of the cropped photo.
+     * Returns the photo paths and hits to save, and the original files that are replaced.
+     * Call off the main thread.
+     */
+    private fun cropSavedPhotos(): Cropped {
+        val paths = anglePaths.toMutableList()
+        var hits = allHits
+        val replaced = mutableListOf<String>()
+        regionByAngle.forEach { (angle, region) ->
+            val old = paths.getOrNull(angle)?.takeIf { it.isNotEmpty() } ?: return@forEach
+            try {
+                val source = BitmapFactory.decodeFile(old) ?: return@forEach
+                val piece = MouthFocus.cut(source, region)
+                val oldFile = File(old)
+                val file = File(oldFile.parentFile, "${oldFile.nameWithoutExtension}_crop_${System.currentTimeMillis()}.jpg")
+                file.outputStream().use { piece.compress(Bitmap.CompressFormat.JPEG, 90, it) }
+
+                hits = hits.map { h ->
+                    if (h.angle != angle) return@map h
+                    val b = h.detection.boundingBox
+                    fun x(v: Float) = ((v - region.left) / region.width).coerceIn(0f, 1f)
+                    fun y(v: Float) = ((v - region.top) / region.height).coerceIn(0f, 1f)
+                    Hit(
+                        TFLiteHelper.Detection(
+                            h.detection.classId, h.detection.className, h.detection.confidence,
+                            RectF(x(b.left), y(b.top), x(b.right), y(b.bottom))
+                        ),
+                        angle
+                    )
+                }
+                paths[angle] = file.absolutePath
+                replaced += old
+            } catch (e: Exception) {
+                e.printStackTrace() // this photo is saved uncropped
+            }
+        }
+        return Cropped(paths, hits, replaced)
+    }
+
+    /** Replaces the analysis stored for the opened scan with the current result (photos stay the same). */
+    private fun updateSavedScan() {
+        val scanId = currentScanId
+        val detection = currentDetections.maxByOrNull { it.confidence }
+        val condition = detection?.className ?: "Healthy"
+        val confidence = detection?.confidence ?: 0f
+        val severity = if (detection != null) ImageUtils.getSeverityText(detection.confidence) else "None"
+        val ticks = ActionPlanBuilder.encodeChecked(checkedSteps)
+
+        // NonCancellable: still finish the write if the user leaves the screen right away
+        lifecycleScope.launch(Dispatchers.IO + NonCancellable) {
+            // Photos analysed by area are saved cropped to that area
+            val cropped = cropSavedPhotos()
+            AppDatabase.getDatabase(this@AnalysisActivity)
+                .scanDao()
+                .updateAnalysis(
+                    scanId, JSONArray(cropped.paths).toString(), condition, confidence, severity,
+                    detectionsToJson(cropped.hits), ticks
+                )
+            cropped.replaced.forEach { File(it).delete() } // the uncropped originals
+
+            // Score, risk and reminders come from the saved scans, so work them out again
+            val scans = HealthScore.scansFor(this@AnalysisActivity)
+            HealthScore.sync(this@AnalysisActivity, HealthScore.compute(scans) ?: HealthScore.START)
+            ReminderScheduler.updateAfterScan(this@AnalysisActivity, scans)
+
+            withContext(Dispatchers.Main) {
+                resultsChanged = false
+                android.widget.Toast.makeText(
+                    this@AnalysisActivity, R.string.saved_scan_updated, android.widget.Toast.LENGTH_SHORT
+                ).show()
+                finish()
             }
         }
     }

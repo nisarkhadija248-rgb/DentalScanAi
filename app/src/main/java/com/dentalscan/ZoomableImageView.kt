@@ -33,6 +33,30 @@ class ZoomableImageView @JvmOverloads constructor(
     private val maxScale = 5f
     private val doubleTapScale = 2.5f
 
+    /** Called when the picture becomes zoomed in or back to normal size. */
+    var onZoomChanged: ((zoomedIn: Boolean) -> Unit)? = null
+    private var lastZoomedIn = false
+
+    fun isZoomedIn(): Boolean = userScale() > ZOOMED_THRESHOLD
+
+    /**
+     * The part of the picture that is on screen right now, as fractions (0..1) of the whole picture:
+     * (left, top, right, bottom). Null if there is no picture yet.
+     */
+    fun visibleRegion(): RectF? {
+        val d = drawable ?: return null
+        val dw = d.intrinsicWidth.toFloat()
+        val dh = d.intrinsicHeight.toFloat()
+        if (dw <= 0f || dh <= 0f || width <= 0 || height <= 0) return null
+
+        val inverse = Matrix()
+        if (!Matrix(baseMatrix).apply { postConcat(userMatrix) }.invert(inverse)) return null
+        val r = RectF(0f, 0f, width.toFloat(), height.toFloat())
+        inverse.mapRect(r) // the view's rectangle, in picture pixels
+        r.intersect(0f, 0f, dw, dh)
+        return RectF(r.left / dw, r.top / dh, r.right / dw, r.bottom / dh)
+    }
+
     private val scaleDetector = ScaleGestureDetector(context, object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
         override fun onScale(detector: ScaleGestureDetector): Boolean {
             val current = userScale()
@@ -132,6 +156,16 @@ class ZoomableImageView @JvmOverloads constructor(
         drawMatrix.set(baseMatrix)
         drawMatrix.postConcat(userMatrix)
         imageMatrix = drawMatrix
+
+        val zoomedIn = isZoomedIn()
+        if (zoomedIn != lastZoomedIn) {
+            lastZoomedIn = zoomedIn
+            onZoomChanged?.invoke(zoomedIn)
+        }
+    }
+
+    private companion object {
+        const val ZOOMED_THRESHOLD = 1.15f
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {

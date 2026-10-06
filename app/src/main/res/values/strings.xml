@@ -53,7 +53,12 @@
     <string name="history_hold_hint">Hold a scan for options</string>
     <string name="scan_option_reanalyse">Re-analyse with the current model</string>
     <string name="scan_option_delete">Delete scan</string>
-    <string name="scan_reanalyse_note">Re-analysing the saved photos with the current model. Nothing is saved.</string>
+    <string name="scan_reanalyse_note">Re-analysing the saved photos with the current model. Tap "Update saved scan" to keep the new result, or go back to leave the scan as it was.</string>
+    <string name="analyse_area">Analyse this area</string>
+    <string name="analyse_whole_photo">Whole photo</string>
+    <string name="update_saved_scan">Update saved scan</string>
+    <string name="saved_scan_updated">Saved scan updated</string>
+    <string name="area_analysis_failed">Could not analyse this area</string>
 
     <!-- ===================== Smart reminders ===================== -->
     <string name="smart_option">Smart (Recommended)</string>

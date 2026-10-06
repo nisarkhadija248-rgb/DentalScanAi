@@ -21,6 +21,21 @@ interface ScanDao {
     @Query("SELECT * FROM scans WHERE userId = :userId AND condition = :condition ORDER BY timestamp DESC")
     fun getScansByCondition(userId: String, condition: String): Flow<List<ScanEntity>>
 
+    /** Replaces the analysis of a saved scan (after it was analysed again), and its photos if some were cropped. */
+    @Query(
+        "UPDATE scans SET imagePath = :imagePath, condition = :condition, confidence = :confidence, " +
+            "severity = :severity, boundingBoxes = :boundingBoxes, checkedSteps = :checkedSteps WHERE id = :scanId"
+    )
+    suspend fun updateAnalysis(
+        scanId: Long,
+        imagePath: String,
+        condition: String,
+        confidence: Float,
+        severity: String,
+        boundingBoxes: String,
+        checkedSteps: String?
+    )
+
     @Query("UPDATE scans SET checkedSteps = :checkedSteps WHERE id = :scanId")
     suspend fun updateCheckedSteps(scanId: Long, checkedSteps: String?)
 

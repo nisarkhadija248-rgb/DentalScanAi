@@ -70,7 +70,11 @@ class HistoryActivity : BaseActivity() {
         titleText.text = if (isUrdu) "سابقہ ریکارڈ" else "Scan History"
 
         recyclerView.layoutManager = LinearLayoutManager(this)
+    }
 
+    // Also runs when coming back from a scan that was updated, so the list and score are current
+    override fun onResume() {
+        super.onResume()
         loadHistory()
     }
 
@@ -145,10 +149,12 @@ class HistoryActivity : BaseActivity() {
                 )
             ) { _, which ->
                 if (which == 0) {
-                    // Opens the normal analysis on the saved photos. Nothing is saved from it.
+                    // Opens the normal analysis on the saved photos. Nothing changes unless the user
+                    // taps "Update saved scan" there (scan_id says which scan to update).
                     val intent = Intent(this, AnalysisActivity::class.java)
                     intent.putExtra("image_path", scan.imagePath)
                     intent.putExtra("reanalyse", true)
+                    intent.putExtra("scan_id", scan.id)
                     startActivity(intent)
                 } else {
                     confirmDelete(scan)

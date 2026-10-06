@@ -134,6 +134,36 @@
                 android:gravity="center"
                 android:textAppearance="@style/TextAppearance.App.Caption"/>
 
+            <!-- Zoom into the teeth, then analyse only that area (or go back to the whole photo) -->
+            <LinearLayout
+                android:id="@+id/regionBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:visibility="gone">
+
+                <Button
+                    android:id="@+id/wholePhotoButton"
+                    style="@style/Widget.App.Button.Outlined"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:text="Whole photo"
+                    android:visibility="gone"/>
+
+                <Button
+                    android:id="@+id/analyseAreaButton"
+                    style="@style/Widget.App.Button.Primary"
+                    android:layout_width="0dp"
+                    android:layout_height="48dp"
+                    android:layout_weight="1.4"
+                    android:text="Analyse this area"
+                    android:visibility="gone"/>
+
+            </LinearLayout>
+
             <!-- Captured photos: scrollable thumbnail row (tap to enlarge) -->
             <LinearLayout
                 android:id="@+id/photosSection"

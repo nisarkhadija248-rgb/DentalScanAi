@@ -40,7 +40,12 @@
     <string name="history_hold_hint">اختیارات کے لیے اسکین کو دبائے رکھیں</string>
     <string name="scan_option_reanalyse">موجودہ ماڈل سے دوبارہ تجزیہ کریں</string>
     <string name="scan_option_delete">اسکین حذف کریں</string>
-    <string name="scan_reanalyse_note">محفوظ تصاویر کا موجودہ ماڈل سے دوبارہ تجزیہ ہو رہا ہے۔ کچھ محفوظ نہیں ہوگا۔</string>
+    <string name="scan_reanalyse_note">محفوظ تصاویر کا موجودہ ماڈل سے دوبارہ تجزیہ ہو رہا ہے۔ نیا نتیجہ رکھنے کے لیے "محفوظ اسکین اپڈیٹ کریں" دبائیں، یا واپس جائیں تو اسکین پہلے جیسا رہے گا۔</string>
+    <string name="analyse_area">اس حصے کا تجزیہ کریں</string>
+    <string name="analyse_whole_photo">پوری تصویر</string>
+    <string name="update_saved_scan">محفوظ اسکین اپڈیٹ کریں</string>
+    <string name="saved_scan_updated">محفوظ اسکین اپڈیٹ ہو گیا</string>
+    <string name="area_analysis_failed">اس حصے کا تجزیہ نہیں ہو سکا</string>
 
     <!-- ===================== اسمارٹ یاددہانی ===================== -->
     <string name="smart_option">اسمارٹ (تجویز کردہ)</string>
